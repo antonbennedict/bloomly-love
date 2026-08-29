@@ -3,7 +3,7 @@ import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
 
 const brevoApiKey = process.env.BREVO_API_KEY;
-const brevoSenderEmail = process.env.BREVO_SENDER_EMAIL || 'abclulu.student@ua.edu.ph';
+const brevoSenderEmail = process.env.BREVO_SENDER_EMAIL || 'gifts@bloomly.app';
 const brevoSenderName = process.env.BREVO_SENDER_NAME || 'Bloomly Gifts';
 
 const resendApiKey = process.env.RESEND_API_KEY;
