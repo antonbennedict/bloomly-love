@@ -269,17 +269,7 @@ export default function RecipientView({ initialBouquet, slug }: RecipientViewPro
             transition={{ duration: 0.8 }}
             className="w-full max-w-4xl flex flex-col items-center justify-center relative min-h-[80vh] py-6"
           >
-            {/* Ambient Floating Sun & Cloud background graphics */}
-            <div className="absolute top-2 inset-x-0 flex items-center justify-between pointer-events-none opacity-80 px-8">
-              <div className="flex items-center gap-2 bg-amber-100/60 dark:bg-stone-800/60 px-4 py-2 rounded-full border border-amber-200/50 backdrop-blur">
-                <span className="text-amber-500 text-lg">☀️</span>
-                <span className="text-xs font-bold text-stone-600 dark:text-stone-300">Warm Wishes</span>
-              </div>
-              <div className="flex items-center gap-1.5 bg-white/70 dark:bg-stone-800/70 px-4 py-2 rounded-full border border-stone-200/50 backdrop-blur">
-                <span className="text-stone-400 text-sm">☁️</span>
-                <span className="text-xs font-semibold text-stone-500">Bloomly Gift</span>
-              </div>
-            </div>
+
 
             {/* Central Bouquet Showcase */}
             <div className="flex flex-col items-center relative my-auto w-full px-4 sm:px-0">
