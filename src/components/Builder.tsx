@@ -661,7 +661,7 @@ export default function Builder() {
           <div
             ref={canvasRef}
             onClick={() => setSelectedId(null)}
-            className={`w-full max-w-[420px] aspect-[4/5] rounded-3xl shadow-2xl border-2 relative overflow-hidden transition-all duration-300 cursor-default ${
+            className={`w-full max-w-[420px] aspect-[5/6] rounded-3xl shadow-2xl border-2 relative overflow-hidden transition-all duration-300 cursor-default ${
               canvasBg === 'default' ? 'bg-white dark:bg-[#141211] border-stone-200/50 canvas-grid dark:border-stone-800/60' :
               canvasBg === 'pink'    ? 'bg-rose-50 border-rose-200/60 dark:bg-rose-950/20 dark:border-rose-900/40' :
               canvasBg === 'sage'    ? 'bg-emerald-50/60 border-emerald-200/50 dark:bg-emerald-950/20 dark:border-emerald-900/40' :

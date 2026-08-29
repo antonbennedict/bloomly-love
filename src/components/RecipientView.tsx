@@ -282,12 +282,9 @@ export default function RecipientView({ initialBouquet, slug }: RecipientViewPro
             </div>
 
             {/* Central Bouquet Showcase */}
-            <div className="flex flex-col items-center relative my-auto">
-              <motion.div 
-                initial={{ scale: 0.8, y: 40 }}
-                animate={{ scale: 1, y: 0 }}
-                transition={{ type: "spring", stiffness: 75, damping: 14 }}
-                className={`w-full max-w-[420px] aspect-[4/5] rounded-3xl shadow-2xl border-2 relative overflow-hidden transition-all duration-300 ${
+            <div className="flex flex-col items-center relative my-auto w-full px-4 sm:px-0">
+              <div 
+                className={`w-full max-w-[420px] aspect-[5/6] rounded-3xl shadow-2xl border-2 relative overflow-hidden transition-all duration-300 ${
                   activeCanvasBg === 'default' ? 'bg-white dark:bg-[#141211] border-stone-200/80 canvas-grid dark:border-stone-800' :
                   activeCanvasBg === 'pink' ? 'bg-rose-50 border-rose-200/80 dark:bg-rose-950/20 dark:border-rose-900/40' :
                   activeCanvasBg === 'sage' ? 'bg-emerald-50/70 border-emerald-200/60 dark:bg-emerald-950/20 dark:border-emerald-900/40' :
@@ -297,31 +294,21 @@ export default function RecipientView({ initialBouquet, slug }: RecipientViewPro
               >
                 {elements
                   .sort((a, b) => a.z - b.z)
-                  .map((el, idx) => {
+                  .map((el) => {
                     const asset = SEEDED_ASSETS.find(a => a.id === el.assetId);
                     return (
-                      <motion.div
+                      <div
                         key={el.id}
-                        initial={{ opacity: 0, scale: 0, y: 140 }}
-                        animate={{ 
-                          opacity: 1, 
-                          scale: 1,
-                          y: 0 
-                        }}
-                        transition={{ 
-                          type: "spring", 
-                          stiffness: 85, 
-                          damping: 12,
-                          delay: idx * 0.08
-                        }}
                         style={{
                           left: `${(el.x / 500) * 100}%`,
                           top: `${(el.y / 600) * 100}%`,
                           transform: `translate(-50%, -50%) rotate(${el.rotation || 0}deg) scale(${el.flipX ? -(el.scale || 1) : (el.scale || 1)}, ${el.flipY ? -(el.scale || 1) : (el.scale || 1)})`,
                           zIndex: el.z || 1,
                           position: 'absolute',
+                          width: '19.2%', // (96px / 500px) * 100% = 19.2% exact proportional match to Builder
+                          height: '16.0%', // (96px / 600px) * 100% = 16.0% exact proportional match to Builder
                         }}
-                        className="w-24 h-24 pointer-events-none select-none drop-shadow-xl flex items-center justify-center"
+                        className="pointer-events-none select-none drop-shadow-xl flex items-center justify-center"
                       >
                         {el.assetId === 'custom-upload' ? (
                           <img src={el.customImageUrl} alt="" className="w-full h-full object-contain" />
@@ -330,10 +317,10 @@ export default function RecipientView({ initialBouquet, slug }: RecipientViewPro
                             <g dangerouslySetInnerHTML={{ __html: asset.svgMarkup }} />
                           </svg>
                         ) : null}
-                      </motion.div>
+                      </div>
                     );
                   })}
-              </motion.div>
+              </div>
 
               {/* Title & Pop-up Card Trigger Button */}
               <div className="mt-6 text-center space-y-3">
