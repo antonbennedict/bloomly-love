@@ -1,9 +1,13 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Flower, Heart, Sparkles, History } from 'lucide-react';
 
 export default function Footer() {
+  const pathname = usePathname();
+  const isRecipientPage = pathname?.startsWith('/b/');
+
   return (
     <footer className="bg-stone-950 text-stone-400 border-t border-stone-850 pt-12 pb-8 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
@@ -20,15 +24,17 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div className="flex items-center gap-6 text-xs font-semibold">
-            <Link href="/create" className="hover:text-sage-400 transition-colors flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-sage-500" /> Create Bouquet
-            </Link>
-            <Link href="/history" className="hover:text-sage-400 transition-colors flex items-center gap-1.5">
-              <History className="w-3.5 h-3.5 text-sage-500" /> My History
-            </Link>
-          </div>
+          {/* Quick Links (Hidden for Recipient view) */}
+          {!isRecipientPage && (
+            <div className="flex items-center gap-6 text-xs font-semibold">
+              <Link href="/create" className="hover:text-sage-400 transition-colors flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-sage-500" /> Create Bouquet
+              </Link>
+              <Link href="/history" className="hover:text-sage-400 transition-colors flex items-center gap-1.5">
+                <History className="w-3.5 h-3.5 text-sage-500" /> My History
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Bottom Credits */}
