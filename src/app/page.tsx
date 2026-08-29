@@ -312,20 +312,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="bg-stone-950 text-stone-400 py-10 border-t border-stone-850">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-sage-600 flex items-center justify-center text-white">
-              <Flower className="w-4 h-4" />
-            </div>
-            <span className="font-serif font-bold text-white tracking-wide">Bloomly</span>
-          </div>
-          <p className="text-[11px] font-medium text-stone-550">
-            &copy; {new Date().getFullYear()} Bloomly. Handcrafted with love & flowers.
-          </p>
-        </div>
-      </footer>
+
     </div>
   );
 }
