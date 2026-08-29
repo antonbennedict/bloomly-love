@@ -11,75 +11,70 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Recipient email is required' }, { status: 400 });
     }
 
-    const origin = new URL(request.url).origin;
+    // Fallback to Vercel production URL if running locally or unconfigured
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || 
+                   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 
+                   (request.url.includes('localhost') ? 'https://bloomly.vercel.app' : new URL(request.url).origin));
+
     const shareUrl = `${origin}/b/${slug}`;
     const cleanSender = senderName ? senderName.trim() : 'Someone special';
     const cleanRecipient = recipientName ? recipientName.trim() : 'Friend';
     
-    // Clean, natural subject line (avoiding spam-trigger words/excess emojis)
-    const subject = `${cleanSender} sent you a bouquet`;
+    // Warm human subject line without spam words
+    const subject = `A special bouquet from ${cleanSender}`;
 
-    // Plain text version (RFC 2822 standard formatting)
-    const textBody = `Hello ${cleanRecipient},\n\n${cleanSender} has sent you a digital bouquet on Bloomly.\n\nYou can view your bouquet and read your personal card by opening this link:\n${shareUrl}\n\nBest regards,\nBloomly Team\n${origin}`;
+    // Plain text version
+    const textBody = `Hello ${cleanRecipient},\n\n${cleanSender} has sent you a virtual floral bouquet on Bloomly.\n\nYou can view your bouquet and read your personal message here:\n${shareUrl}\n\nWarmly,\nBloomly Flowers`;
 
-    // Clean, responsive email layout optimized for Gmail Inbox placement
+    // High deliverability email HTML
     const htmlBody = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>${subject}</title>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f7f5f2; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #2d3748;">
-  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f7f5f2; padding: 30px 15px;">
+<body style="margin: 0; padding: 20px 0; background-color: #faf6f0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #2d3748;">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
     <tr>
       <td align="center">
-        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 560px; background-color: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);">
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 520px; background-color: #ffffff; border-radius: 20px; border: 1px solid #e8e2d9; overflow: hidden; padding: 32px 28px;">
           
-          <!-- Header -->
           <tr>
-            <td style="background-color: #4a6c57; padding: 32px 30px; text-align: center;">
-              <h1 style="margin: 0; color: #ffffff; font-size: 22px; font-weight: 700; letter-spacing: -0.2px;">Bloomly Bouquet Gift</h1>
+            <td style="text-align: center; pb-4;">
+              <h1 style="margin: 0 0 8px; color: #4a6c57; font-size: 24px; font-weight: 700;">Bloomly Bouquet</h1>
+              <p style="margin: 0; font-size: 14px; color: #718096;">Digital Floral Gift</p>
             </td>
           </tr>
 
-          <!-- Body Content -->
           <tr>
-            <td style="padding: 36px 32px 28px;">
-              <p style="margin: 0 0 16px; font-size: 16px; font-weight: 600; color: #1a202c;">
-                Hello ${cleanRecipient},
-              </p>
-              <p style="margin: 0 0 24px; font-size: 15px; line-height: 1.6; color: #4a5568;">
-                <strong>${cleanSender}</strong> created a personalized virtual flower bouquet for you on Bloomly.
+            <td style="padding: 24px 0 16px;">
+              <p style="margin: 0 0 14px; font-size: 16px; color: #2d3748;">Hi ${cleanRecipient},</p>
+              <p style="margin: 0 0 20px; font-size: 15px; line-height: 1.5; color: #4a5568;">
+                <strong>${cleanSender}</strong> created a custom bouquet of flowers for you on Bloomly.
               </p>
 
-              <!-- CTA Container -->
-              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 28px 0;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 24px 0;">
                 <tr>
                   <td align="center">
-                    <a href="${shareUrl}" style="display: inline-block; background-color: #4a6c57; color: #ffffff; font-size: 15px; font-weight: 600; text-decoration: none; padding: 14px 32px; border-radius: 10px; border: 1px solid #3d5e48;">
-                      Open Your Bouquet
+                    <a href="${shareUrl}" style="display: inline-block; background-color: #4a6c57; color: #ffffff; font-size: 15px; font-weight: 700; text-decoration: none; padding: 14px 36px; border-radius: 12px;">
+                      View Bouquet & Card
                     </a>
                   </td>
                 </tr>
               </table>
 
-              <p style="margin: 24px 0 8px; font-size: 12px; font-weight: 600; color: #718096; text-transform: uppercase; letter-spacing: 0.5px;">
-                Or paste this link in your browser:
-              </p>
-              <p style="margin: 0; background-color: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; font-family: monospace; font-size: 13px; color: #2d3748; word-break: break-all;">
-                ${shareUrl}
+              <p style="margin: 20px 0 6px; font-size: 12px; color: #a0aec0;">Direct Link:</p>
+              <p style="margin: 0; font-size: 13px; color: #4a6c57; word-break: break-all;">
+                <a href="${shareUrl}" style="color: #4a6c57; text-decoration: underline;">${shareUrl}</a>
               </p>
             </td>
           </tr>
 
-          <!-- Footer -->
           <tr>
-            <td style="background-color: #f8fafc; border-top: 1px solid #edf2f7; padding: 20px 32px; text-align: center;">
-              <p style="margin: 0 0 6px; font-size: 13px; font-weight: 600; color: #4a6c57;">Bloomly Digital Flowers</p>
-              <p style="margin: 0; font-size: 11px; color: #a0aec0;">
-                Sent via Bloomly &middot; <a href="${origin}" style="color: #4a6c57; text-decoration: underline;">Create a bouquet</a>
+            <td style="border-top: 1px solid #edf2f7; padding-top: 20px; text-align: center;">
+              <p style="margin: 0; font-size: 12px; color: #a0aec0;">
+                Sent with love from Bloomly
               </p>
             </td>
           </tr>
@@ -92,13 +87,14 @@ export async function POST(request: Request) {
 </html>`;
 
     const { data, error } = await resend.emails.send({
-      from: 'Bloomly <onboarding@resend.dev>',
+      from: 'Bloomly Gifts <onboarding@resend.dev>',
       to: [email],
       subject,
       html: htmlBody,
       text: textBody,
+      replyTo: 'support@resend.dev',
       headers: {
-        'List-Unsubscribe': `<${origin}>`,
+        'List-Unsubscribe': `<${shareUrl}>`,
         'X-Entity-Ref-ID': slug || 'bloomly-bouquet',
       },
     });
