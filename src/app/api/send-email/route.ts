@@ -136,6 +136,41 @@ export async function POST(request: Request) {
       const responseData = await res.json();
       if (!res.ok) {
         console.error('[Brevo API Error]:', responseData);
+        // If unverified sender error on Brevo, retry with verified account email
+        if (responseData.code === 'unauthorized' || responseData.message?.includes('sender') || responseData.code === 'invalid_parameter') {
+          console.warn('Retrying Brevo with verified account email...');
+          const retryRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+              'accept': 'application/json',
+              'api-key': brevoApiKey,
+              'content-type': 'application/json',
+            },
+            body: JSON.stringify({
+              sender: { name: brevoSenderName, email: 'abclulu.student@ua.edu.ph' },
+              to: [{ email }],
+              subject,
+              htmlContent: htmlBody,
+              textContent: textBody,
+            }),
+          });
+          const retryData = await retryRes.json();
+          if (retryRes.ok) {
+            return NextResponse.json({ success: true, provider: 'brevo-fallback', data: retryData });
+          }
+        }
+        
+        // If Brevo fails, fall through to Resend
+        if (resend) {
+          const { data, error } = await resend.emails.send({
+            from: 'Bloomly Gifts <onboarding@resend.dev>',
+            to: [email],
+            subject,
+            html: htmlBody,
+            text: textBody,
+          });
+          if (!error) return NextResponse.json({ success: true, provider: 'resend-fallback', data });
+        }
         return NextResponse.json({ error: responseData.message || 'Brevo API dispatch failed' }, { status: res.status });
       }
       return NextResponse.json({ success: true, provider: 'brevo', data: responseData });
