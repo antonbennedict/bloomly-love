@@ -2,14 +2,18 @@ import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
 
+const brevoApiKey = process.env.BREVO_API_KEY;
+const brevoSenderEmail = process.env.BREVO_SENDER_EMAIL || 'abclulu.student@ua.edu.ph';
+const brevoSenderName = process.env.BREVO_SENDER_NAME || 'Bloomly Gifts';
+
 const resendApiKey = process.env.RESEND_API_KEY;
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
-// Configure SMTP transport if custom SMTP credentials (e.g., Gmail App Password, SendGrid, Mailgun) are provided in .env
+// Configure SMTP transport if custom SMTP credentials (e.g., Gmail App Password, Brevo SMTP) are provided in .env
 const smtpUser = process.env.SMTP_USER;
 const smtpPass = process.env.SMTP_PASS;
-const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
-const smtpPort = parseInt(process.env.SMTP_PORT || '465');
+const smtpHost = process.env.SMTP_HOST || 'smtp-relay.brevo.com';
+const smtpPort = parseInt(process.env.SMTP_PORT || '587');
 
 const transporter = (smtpUser && smtpPass) ? nodemailer.createTransport({
   host: smtpHost,
@@ -38,7 +42,6 @@ export async function POST(request: Request) {
     const cleanRecipient = recipientName ? recipientName.trim() : 'Friend';
     
     const subject = `A special bouquet from ${cleanSender}`;
-
     const textBody = `Hello ${cleanRecipient},\n\n${cleanSender} has sent you a virtual floral bouquet on Bloomly.\n\nYou can view your bouquet and read your personal message here:\n${shareUrl}\n\nWarmly,\nBloomly Flowers`;
 
     const htmlBody = `<!DOCTYPE html>
@@ -100,10 +103,39 @@ export async function POST(request: Request) {
 </body>
 </html>`;
 
-    // 1. Primary Option: Nodemailer (SMTP / Gmail / Custom Server)
+    // 1. Primary Option: Brevo REST API v3
+    if (brevoApiKey) {
+      const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'api-key': brevoApiKey,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          sender: { name: brevoSenderName, email: brevoSenderEmail },
+          to: [{ email }],
+          subject,
+          htmlContent: htmlBody,
+          textContent: textBody,
+          headers: {
+            'List-Unsubscribe': `<${shareUrl}>`,
+          }
+        }),
+      });
+
+      const responseData = await res.json();
+      if (!res.ok) {
+        console.error('[Brevo API Error]:', responseData);
+        return NextResponse.json({ error: responseData.message || 'Brevo API dispatch failed' }, { status: res.status });
+      }
+      return NextResponse.json({ success: true, provider: 'brevo', data: responseData });
+    }
+
+    // 2. Secondary Option: SMTP / Nodemailer
     if (transporter && smtpUser) {
       const info = await transporter.sendMail({
-        from: `"Bloomly Gifts" <${smtpUser}>`,
+        from: `"${brevoSenderName}" <${smtpUser}>`,
         to: email,
         subject,
         text: textBody,
@@ -112,7 +144,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, provider: 'smtp', messageId: info.messageId });
     }
 
-    // 2. Secondary Option: Resend API
+    // 3. Fallback: Resend API
     if (resend) {
       const { data, error } = await resend.emails.send({
         from: 'Bloomly Gifts <onboarding@resend.dev>',
@@ -128,7 +160,7 @@ export async function POST(request: Request) {
       });
 
       if (error) {
-        console.error('[Resend] API Error:', error);
+        console.error('[Resend API Error]:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
 
