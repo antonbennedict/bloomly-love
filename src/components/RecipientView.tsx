@@ -419,19 +419,13 @@ export default function RecipientView({ initialBouquet, slug }: RecipientViewPro
               </div>
             )}
 
-            {/* Bottom Actions */}
-            <div className="flex gap-3 max-w-sm w-full mt-4">
-              <Link
-                href="/create"
-                className="flex-1 bg-[#4a6c57] hover:bg-[#3d5e48] text-white font-bold py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-[#4a6c57]/20 text-xs transition-all hover:scale-[1.01] cursor-pointer"
-              >
-                <Flower className="w-4 h-4" /> Create Bouquet
-              </Link>
+            {/* Bottom Action: Create a bouquet reply back */}
+            <div className="flex flex-col sm:flex-row gap-3 max-w-md w-full mt-4">
               <Link
                 href={`/create?replyTo=${encodeURIComponent(sender_name || 'Guest')}`}
-                className="flex-1 bg-stone-900 hover:bg-stone-800 text-white font-bold py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 text-xs transition-all hover:scale-[1.01] cursor-pointer"
+                className="flex-1 bg-[#4a6c57] hover:bg-[#3d5e48] text-white font-bold py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-xl shadow-[#4a6c57]/20 text-xs transition-all hover:scale-[1.02] cursor-pointer"
               >
-                <RefreshCw className="w-3.5 h-3.5" /> Reply Bouquet
+                <Flower className="w-4 h-4" /> Create & Send Bouquet Back to {sender_name || 'Sender'}
               </Link>
             </div>
           </motion.div>
