@@ -1,7 +1,25 @@
 import { NextResponse } from 'next/server';
+import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resendApiKey = process.env.RESEND_API_KEY;
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
+
+// Configure SMTP transport if custom SMTP credentials (e.g., Gmail App Password, SendGrid, Mailgun) are provided in .env
+const smtpUser = process.env.SMTP_USER;
+const smtpPass = process.env.SMTP_PASS;
+const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
+const smtpPort = parseInt(process.env.SMTP_PORT || '465');
+
+const transporter = (smtpUser && smtpPass) ? nodemailer.createTransport({
+  host: smtpHost,
+  port: smtpPort,
+  secure: smtpPort === 465,
+  auth: {
+    user: smtpUser,
+    pass: smtpPass,
+  },
+}) : null;
 
 export async function POST(request: Request) {
   try {
@@ -11,7 +29,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Recipient email is required' }, { status: 400 });
     }
 
-    // Fallback to Vercel production URL if running locally or unconfigured
     const origin = process.env.NEXT_PUBLIC_SITE_URL || 
                    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 
                    (request.url.includes('localhost') ? 'https://bloomly.vercel.app' : new URL(request.url).origin));
@@ -20,13 +37,10 @@ export async function POST(request: Request) {
     const cleanSender = senderName ? senderName.trim() : 'Someone special';
     const cleanRecipient = recipientName ? recipientName.trim() : 'Friend';
     
-    // Warm human subject line without spam words
     const subject = `A special bouquet from ${cleanSender}`;
 
-    // Plain text version
     const textBody = `Hello ${cleanRecipient},\n\n${cleanSender} has sent you a virtual floral bouquet on Bloomly.\n\nYou can view your bouquet and read your personal message here:\n${shareUrl}\n\nWarmly,\nBloomly Flowers`;
 
-    // High deliverability email HTML
     const htmlBody = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -86,28 +100,45 @@ export async function POST(request: Request) {
 </body>
 </html>`;
 
-    const { data, error } = await resend.emails.send({
-      from: 'Bloomly Gifts <onboarding@resend.dev>',
-      to: [email],
-      subject,
-      html: htmlBody,
-      text: textBody,
-      replyTo: 'support@resend.dev',
-      headers: {
-        'List-Unsubscribe': `<${shareUrl}>`,
-        'X-Entity-Ref-ID': slug || 'bloomly-bouquet',
-      },
-    });
-
-    if (error) {
-      console.error('[Resend] API Error:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    // 1. Primary Option: Nodemailer (SMTP / Gmail / Custom Server)
+    if (transporter && smtpUser) {
+      const info = await transporter.sendMail({
+        from: `"Bloomly Gifts" <${smtpUser}>`,
+        to: email,
+        subject,
+        text: textBody,
+        html: htmlBody,
+      });
+      return NextResponse.json({ success: true, provider: 'smtp', messageId: info.messageId });
     }
 
-    return NextResponse.json({ success: true, data });
+    // 2. Secondary Option: Resend API
+    if (resend) {
+      const { data, error } = await resend.emails.send({
+        from: 'Bloomly Gifts <onboarding@resend.dev>',
+        to: [email],
+        subject,
+        html: htmlBody,
+        text: textBody,
+        replyTo: 'support@resend.dev',
+        headers: {
+          'List-Unsubscribe': `<${shareUrl}>`,
+          'X-Entity-Ref-ID': slug || 'bloomly-bouquet',
+        },
+      });
+
+      if (error) {
+        console.error('[Resend] API Error:', error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ success: true, provider: 'resend', data });
+    }
+
+    return NextResponse.json({ error: 'No email service provider configured' }, { status: 500 });
 
   } catch (err: any) {
-    console.error('[Resend] Internal Error:', err);
+    console.error('[Email Dispatcher] Internal Error:', err);
     return NextResponse.json({ error: err.message || 'Failed to send email' }, { status: 500 });
   }
 }
