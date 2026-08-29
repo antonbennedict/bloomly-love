@@ -287,7 +287,7 @@ export default function RecipientView({ initialBouquet, slug }: RecipientViewPro
                 initial={{ scale: 0.8, y: 40 }}
                 animate={{ scale: 1, y: 0 }}
                 transition={{ type: "spring", stiffness: 75, damping: 14 }}
-                className={`w-full max-w-[560px] aspect-[4/5] rounded-3xl shadow-2xl border-2 relative overflow-hidden transition-all duration-300 ${
+                className={`w-full max-w-[420px] aspect-[4/5] rounded-3xl shadow-2xl border-2 relative overflow-hidden transition-all duration-300 ${
                   activeCanvasBg === 'default' ? 'bg-white dark:bg-[#141211] border-stone-200/80 canvas-grid dark:border-stone-800' :
                   activeCanvasBg === 'pink' ? 'bg-rose-50 border-rose-200/80 dark:bg-rose-950/20 dark:border-rose-900/40' :
                   activeCanvasBg === 'sage' ? 'bg-emerald-50/70 border-emerald-200/60 dark:bg-emerald-950/20 dark:border-emerald-900/40' :
@@ -321,7 +321,7 @@ export default function RecipientView({ initialBouquet, slug }: RecipientViewPro
                           zIndex: el.z || 1,
                           position: 'absolute',
                         }}
-                        className="w-36 h-36 pointer-events-none select-none drop-shadow-xl"
+                        className="w-24 h-24 pointer-events-none select-none drop-shadow-xl flex items-center justify-center"
                       >
                         {el.assetId === 'custom-upload' ? (
                           <img src={el.customImageUrl} alt="" className="w-full h-full object-contain" />
