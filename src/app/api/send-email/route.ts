@@ -33,9 +33,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Recipient email is required' }, { status: 400 });
     }
 
-    const origin = process.env.NEXT_PUBLIC_SITE_URL || 
-                   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 
-                   (request.url.includes('localhost') ? 'https://bloomly.vercel.app' : new URL(request.url).origin));
+    // Dynamically resolve actual origin URL from request headers or host
+    const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
+    const proto = request.headers.get('x-forwarded-proto') || 'https';
+    
+    let origin = process.env.NEXT_PUBLIC_SITE_URL;
+    if (!origin) {
+      if (host) {
+        origin = `${proto}://${host}`;
+      } else if (process.env.VERCEL_URL) {
+        origin = `https://${process.env.VERCEL_URL}`;
+      } else {
+        origin = new URL(request.url).origin;
+      }
+    }
 
     const shareUrl = `${origin}/b/${slug}`;
     const cleanSender = senderName ? senderName.trim() : 'Someone special';
