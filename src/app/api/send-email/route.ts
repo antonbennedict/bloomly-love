@@ -50,9 +50,11 @@ export async function POST(request: Request) {
     const cleanSender = senderName ? senderName.trim() : 'Someone special';
     const cleanRecipient = recipientName ? recipientName.trim() : 'Friend';
     
-    const subject = `A special bouquet from ${cleanSender}`;
-    const textBody = `Hello ${cleanRecipient},\n\n${cleanSender} has sent you a virtual floral bouquet on Bloomly.\n\nYou can view your bouquet and read your personal message here:\n${shareUrl}\n\nWarmly,\nBloomly Flowers`;
+    // Personal subject line (avoids marketing keywords)
+    const subject = `${cleanSender} sent you flowers`;
+    const textBody = `Hi ${cleanRecipient},\n\n${cleanSender} just sent you a personal bouquet gift.\n\nOpen your flowers here:\n${shareUrl}\n\nFrom,\n${cleanSender}`;
 
+    // Clean personal letter template (Gmail classifies marketing tables with large hero buttons as Promotions)
     const htmlBody = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -60,55 +62,28 @@ export async function POST(request: Request) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${subject}</title>
 </head>
-<body style="margin: 0; padding: 20px 0; background-color: #faf6f0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #2d3748;">
-  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-    <tr>
-      <td align="center">
-        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 520px; background-color: #ffffff; border-radius: 20px; border: 1px solid #e8e2d9; overflow: hidden; padding: 32px 28px;">
-          
-          <tr>
-            <td style="text-align: center; pb-4;">
-              <h1 style="margin: 0 0 8px; color: #4a6c57; font-size: 24px; font-weight: 700;">Bloomly Bouquet</h1>
-              <p style="margin: 0; font-size: 14px; color: #718096;">Digital Floral Gift</p>
-            </td>
-          </tr>
+<body style="margin: 0; padding: 24px; background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.6; color: #1a1a1a;">
+  <div style="max-width: 480px; margin: 0 auto;">
+    <p style="margin: 0 0 16px;">Hi <strong>${cleanRecipient}</strong>,</p>
+    <p style="margin: 0 0 20px; color: #2d3748;">
+      <strong>${cleanSender}</strong> created a personal flower bouquet and left a gift card for you on Bloomly.
+    </p>
+    
+    <div style="margin: 28px 0; text-align: center;">
+      <a href="${shareUrl}" style="background-color: #4a6c57; color: #ffffff; font-size: 15px; font-weight: 600; text-decoration: none; padding: 12px 28px; border-radius: 10px; display: inline-block;">
+        Open Your Bouquet & Card &rarr;
+      </a>
+    </div>
 
-          <tr>
-            <td style="padding: 24px 0 16px;">
-              <p style="margin: 0 0 14px; font-size: 16px; color: #2d3748;">Hi ${cleanRecipient},</p>
-              <p style="margin: 0 0 20px; font-size: 15px; line-height: 1.5; color: #4a5568;">
-                <strong>${cleanSender}</strong> created a custom bouquet of flowers for you on Bloomly.
-              </p>
-
-              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 24px 0;">
-                <tr>
-                  <td align="center">
-                    <a href="${shareUrl}" style="display: inline-block; background-color: #4a6c57; color: #ffffff; font-size: 15px; font-weight: 700; text-decoration: none; padding: 14px 36px; border-radius: 12px;">
-                      View Bouquet & Card
-                    </a>
-                  </td>
-                </tr>
-              </table>
-
-              <p style="margin: 20px 0 6px; font-size: 12px; color: #a0aec0;">Direct Link:</p>
-              <p style="margin: 0; font-size: 13px; color: #4a6c57; word-break: break-all;">
-                <a href="${shareUrl}" style="color: #4a6c57; text-decoration: underline;">${shareUrl}</a>
-              </p>
-            </td>
-          </tr>
-
-          <tr>
-            <td style="border-top: 1px solid #edf2f7; padding-top: 20px; text-align: center;">
-              <p style="margin: 0; font-size: 12px; color: #a0aec0;">
-                Sent with love from Bloomly
-              </p>
-            </td>
-          </tr>
-
-        </table>
-      </td>
-    </tr>
-  </table>
+    <p style="margin: 24px 0 6px; font-size: 13px; color: #718096;">
+      Direct link: <a href="${shareUrl}" style="color: #4a6c57; text-decoration: underline;">${shareUrl}</a>
+    </p>
+    
+    <p style="margin: 28px 0 0; color: #718096; font-size: 14px;">
+      Warmly,<br>
+      <strong>${cleanSender}</strong>
+    </p>
+  </div>
 </body>
 </html>`;
 
