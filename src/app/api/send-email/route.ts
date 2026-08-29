@@ -33,18 +33,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Recipient email is required' }, { status: 400 });
     }
 
-    // Dynamically resolve actual origin URL from request headers or host
+    // Dynamically resolve actual origin URL or fallback to bloomly-love.vercel.app
     const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
     const proto = request.headers.get('x-forwarded-proto') || 'https';
     
     let origin = process.env.NEXT_PUBLIC_SITE_URL;
     if (!origin) {
-      if (host) {
+      if (host && !host.includes('localhost')) {
         origin = `${proto}://${host}`;
-      } else if (process.env.VERCEL_URL) {
-        origin = `https://${process.env.VERCEL_URL}`;
       } else {
-        origin = new URL(request.url).origin;
+        origin = 'https://bloomly-love.vercel.app';
       }
     }
 
