@@ -287,7 +287,7 @@ export default function RecipientView({ initialBouquet, slug }: RecipientViewPro
                 initial={{ scale: 0.8, y: 40 }}
                 animate={{ scale: 1, y: 0 }}
                 transition={{ type: "spring", stiffness: 75, damping: 14 }}
-                className={`w-full max-w-[480px] aspect-[4/5] rounded-3xl shadow-2xl border-2 relative overflow-hidden transition-all duration-300 ${
+                className={`w-full max-w-[560px] aspect-[4/5] rounded-3xl shadow-2xl border-2 relative overflow-hidden transition-all duration-300 ${
                   activeCanvasBg === 'default' ? 'bg-white dark:bg-[#141211] border-stone-200/80 canvas-grid dark:border-stone-800' :
                   activeCanvasBg === 'pink' ? 'bg-rose-50 border-rose-200/80 dark:bg-rose-950/20 dark:border-rose-900/40' :
                   activeCanvasBg === 'sage' ? 'bg-emerald-50/70 border-emerald-200/60 dark:bg-emerald-950/20 dark:border-emerald-900/40' :
@@ -305,8 +305,7 @@ export default function RecipientView({ initialBouquet, slug }: RecipientViewPro
                         initial={{ opacity: 0, scale: 0, y: 140 }}
                         animate={{ 
                           opacity: 1, 
-                          scaleX: el.flipX ? -el.scale : el.scale, 
-                          scaleY: el.flipY ? -el.scale : el.scale, 
+                          scale: 1,
                           y: 0 
                         }}
                         transition={{ 
@@ -318,11 +317,11 @@ export default function RecipientView({ initialBouquet, slug }: RecipientViewPro
                         style={{
                           left: `${(el.x / 500) * 100}%`,
                           top: `${(el.y / 600) * 100}%`,
-                          transform: `translate(-50%, -50%) rotate(${el.rotation}deg)`,
-                          zIndex: el.z,
+                          transform: `translate(-50%, -50%) rotate(${el.rotation || 0}deg) scale(${el.flipX ? -(el.scale || 1) : (el.scale || 1)}, ${el.flipY ? -(el.scale || 1) : (el.scale || 1)})`,
+                          zIndex: el.z || 1,
                           position: 'absolute',
                         }}
-                        className="w-28 h-28 pointer-events-none select-none drop-shadow-lg"
+                        className="w-36 h-36 pointer-events-none select-none drop-shadow-xl"
                       >
                         {el.assetId === 'custom-upload' ? (
                           <img src={el.customImageUrl} alt="" className="w-full h-full object-contain" />
@@ -336,24 +335,22 @@ export default function RecipientView({ initialBouquet, slug }: RecipientViewPro
                   })}
               </motion.div>
 
-
-
               {/* Title & Pop-up Card Trigger Button */}
               <div className="mt-6 text-center space-y-3">
                 <div>
-                  <h2 className="text-xl font-serif font-bold text-stone-800 dark:text-stone-100">
+                  <h2 className="text-2xl font-serif font-bold text-stone-800 dark:text-stone-100">
                     {title || 'A Custom Bouquet'}
                   </h2>
-                  <p className="text-xs text-stone-500 font-medium mt-0.5">
+                  <p className="text-sm text-stone-500 font-medium mt-1">
                     Crafted with love for <strong className="text-[#4a6c57]">{recipient_name || 'Someone Special'}</strong>
                   </p>
                 </div>
 
                 <button
                   onClick={() => setIsCardOpen(true)}
-                  className="bg-[#4a6c57] hover:bg-[#3d5e48] text-white font-bold px-6 py-3 rounded-2xl shadow-lg shadow-[#4a6c57]/25 flex items-center gap-2 mx-auto text-xs transition-all hover:scale-105 cursor-pointer"
+                  className="bg-[#4a6c57] hover:bg-[#3d5e48] text-white font-bold px-8 py-3.5 rounded-2xl shadow-xl shadow-[#4a6c57]/25 flex items-center gap-2.5 mx-auto text-sm transition-all hover:scale-105 cursor-pointer"
                 >
-                  <Mail className="w-4 h-4" /> Open Personal Keepsake Card
+                  <Mail className="w-5 h-5" /> Open Personal Keepsake Card
                 </button>
               </div>
             </div>
@@ -365,18 +362,18 @@ export default function RecipientView({ initialBouquet, slug }: RecipientViewPro
                   initial={{ scale: 0.8, opacity: 0, y: 30 }}
                   animate={{ scale: 1, opacity: 1, y: 0 }}
                   exit={{ scale: 0.8, opacity: 0, y: 30 }}
-                  className="bg-[#FAF6F0] text-stone-850 rounded-3xl max-w-lg w-full p-7 border-2 border-amber-900/20 shadow-2xl relative space-y-5"
+                  className="bg-[#FAF6F0] text-stone-850 rounded-3xl max-w-xl w-full p-8 border-2 border-amber-900/20 shadow-2xl relative space-y-6"
                 >
                   {/* Close button */}
                   <button 
                     onClick={() => setIsCardOpen(false)}
-                    className="absolute top-4 right-4 w-8 h-8 rounded-full bg-amber-900/10 hover:bg-amber-900/20 flex items-center justify-center text-amber-950 font-bold text-xs transition-colors cursor-pointer"
+                    className="absolute top-5 right-5 w-8 h-8 rounded-full bg-amber-900/10 hover:bg-amber-900/20 flex items-center justify-center text-amber-950 font-bold text-xs transition-colors cursor-pointer z-10"
                   >
                     ✕
                   </button>
 
                   {/* Header */}
-                  <div className="flex items-center gap-2 border-b border-amber-900/10 pb-3">
+                  <div className="flex items-center gap-2 border-b border-amber-900/10 pb-3 pr-10">
                     <Mail className="w-4 h-4 text-amber-800" />
                     <span className="text-[10px] font-bold uppercase tracking-widest text-amber-900/70">Personal Card</span>
                     <span className="ml-auto text-[9px] font-mono tracking-widest text-amber-800/60 uppercase border border-amber-900/20 px-2 py-0.5 rounded">AIR MAIL</span>

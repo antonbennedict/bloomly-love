@@ -677,6 +677,10 @@ export default function Builder() {
                 return (
                   <div
                     key={el.id}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedId(el.id);
+                    }}
                     onMouseDown={(e) => handleStartDrag(e, el.id)}
                     onTouchStart={(e) => handleStartDrag(e, el.id)}
                     style={{
