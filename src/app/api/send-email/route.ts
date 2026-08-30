@@ -145,8 +145,14 @@ export async function POST(request: Request) {
             text: textBody,
           });
           if (!error) return NextResponse.json({ success: true, provider: 'resend-fallback', data });
+          console.error('[Resend Fallback Error]:', error);
         }
-        return NextResponse.json({ error: responseData.message || 'Brevo API dispatch failed' }, { status: res.status });
+        
+        let customErrMsg = responseData.message || 'Brevo API dispatch failed';
+        if (responseData.code === 'unauthorized' && responseData.message?.includes('unrecognised IP address')) {
+          customErrMsg = 'Brevo IP restriction: Add your IP address (120.29.108.213) in https://app.brevo.com/security/authorised_ips or disable IP whitelist in Brevo.';
+        }
+        return NextResponse.json({ error: customErrMsg }, { status: res.status });
       }
       return NextResponse.json({ success: true, provider: 'brevo', data: responseData });
     }
