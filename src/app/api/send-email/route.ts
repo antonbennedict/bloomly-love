@@ -50,11 +50,11 @@ export async function POST(request: Request) {
     const cleanSender = senderName ? senderName.trim() : 'Someone special';
     const cleanRecipient = recipientName ? recipientName.trim() : 'Friend';
     
-    // Anti-Spam optimized subject line & headers
+    // Personal subject line & body (avoids marketing keywords and bulk headers)
     const subject = `${cleanSender} sent you a bouquet on Bloomly`;
-    const textBody = `Hi ${cleanRecipient},\n\n${cleanSender} created a personal flower bouquet for you on Bloomly.\n\nView your bouquet here:\n${shareUrl}\n\nWarmly,\n${cleanSender}`;
+    const textBody = `Hi ${cleanRecipient},\n\n${cleanSender} created a personal flower bouquet for you on Bloomly.\n\nView your bouquet & gift card here:\n${shareUrl}\n\nWarmly,\n${cleanSender}`;
 
-    // Clean personal letter template (Gmail classifies marketing tables with large hero buttons as Promotions)
+    // Clean personal email template (No newsletter tables or bulk styling)
     const htmlBody = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -62,38 +62,24 @@ export async function POST(request: Request) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${subject}</title>
 </head>
-<body style="margin: 0; padding: 24px; background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.6; color: #1a1a1a;">
-  <div style="max-width: 480px; margin: 0 auto; border: 1px solid #e2ebe5; border-radius: 16px; padding: 32px; background-color: #fafbfb;">
-    
-    <!-- Bloomly Brand Logo Header -->
-    <div style="text-align: center; margin-bottom: 24px;">
-      <div style="display: inline-block; width: 44px; height: 44px; background-color: #4a6c57; border-radius: 50%; text-align: center; line-height: 44px; color: #ffffff; font-size: 22px; font-weight: bold; box-shadow: 0 4px 12px rgba(74, 108, 87, 0.2);">
-        ❀
-      </div>
-      <div style="font-family: Georgia, serif; font-size: 20px; font-weight: bold; color: #2d4235; margin-top: 8px; letter-spacing: 0.5px;">
-        Bloomly
-      </div>
-      <div style="font-size: 11px; color: #718096; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px;">
-        Digital Floral Keepsakes
-      </div>
-    </div>
-
-    <p style="margin: 0 0 16px; color: #1a1a1a;">Hi <strong>${cleanRecipient}</strong>,</p>
-    <p style="margin: 0 0 20px; color: #2d3748;">
+<body style="margin: 0; padding: 20px; background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 15px; color: #1a1a1a; line-height: 1.6;">
+  <div style="max-width: 460px; margin: 0 auto;">
+    <p style="margin-bottom: 16px;">Hi <strong>${cleanRecipient}</strong>,</p>
+    <p style="margin-bottom: 20px; color: #2d3748;">
       <strong>${cleanSender}</strong> created a personal flower bouquet and left a gift card for you on Bloomly.
     </p>
     
-    <div style="margin: 28px 0; text-align: center;">
-      <a href="${shareUrl}" style="background-color: #4a6c57; color: #ffffff; font-size: 15px; font-weight: 600; text-decoration: none; padding: 14px 32px; border-radius: 12px; display: inline-block; box-shadow: 0 4px 12px rgba(74, 108, 87, 0.25);">
+    <div style="margin: 24px 0;">
+      <a href="${shareUrl}" style="background-color: #4a6c57; color: #ffffff; font-size: 14px; font-weight: 600; text-decoration: none; padding: 12px 24px; border-radius: 10px; display: inline-block;">
         Open Your Bouquet & Card &rarr;
       </a>
     </div>
 
-    <p style="margin: 24px 0 6px; font-size: 13px; color: #718096;">
-      Direct link: <a href="${shareUrl}" style="color: #4a6c57; text-decoration: underline;">${shareUrl}</a>
+    <p style="margin-top: 20px; font-size: 13px; color: #718096;">
+      Link: <a href="${shareUrl}" style="color: #4a6c57; text-decoration: underline;">${shareUrl}</a>
     </p>
     
-    <p style="margin: 28px 0 0; color: #718096; font-size: 14px; border-top: 1px solid #e2ebe5; padding-top: 16px;">
+    <p style="margin-top: 24px; color: #4a5568; font-size: 14px;">
       Warmly,<br>
       <strong>${cleanSender}</strong>
     </p>
@@ -101,7 +87,7 @@ export async function POST(request: Request) {
 </body>
 </html>`;
 
-    // 1. Primary Option: SMTP Relay (Brevo SMTP or Gmail SMTP - bypasses REST API IP Whitelisting)
+    // 1. Primary Option: SMTP Relay (Gmail SMTP - Personal direct delivery)
     if (smtpUser && smtpPass) {
       try {
         const smtpTransporter = nodemailer.createTransport({
@@ -115,16 +101,12 @@ export async function POST(request: Request) {
         });
 
         const info = await smtpTransporter.sendMail({
-          from: `"${brevoSenderName}" <${brevoSenderEmail || smtpUser}>`,
+          from: `"${cleanSender} via Bloomly" <${smtpUser}>`,
           to: email,
           replyTo: smtpUser,
           subject,
           text: textBody,
           html: htmlBody,
-          headers: {
-            'List-Unsubscribe': `<${shareUrl}>`,
-            'X-Entity-Ref-ID': slug || 'bloomly',
-          }
         });
         return NextResponse.json({ success: true, provider: 'smtp', messageId: info.messageId });
       } catch (smtpErr: any) {
