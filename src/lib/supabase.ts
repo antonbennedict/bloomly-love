@@ -150,12 +150,16 @@ export async function getBouquetBySlug(slug: string): Promise<BouquetData | null
  * Fetch public bouquets for the gallery
  */
 export async function getPublicBouquets(): Promise<BouquetData[]> {
+  // Reset cutoff: filter out past records created prior to reset
+  const GALLERY_CUTOFF = '2026-08-30T11:00:00.000Z';
+
   if (supabase) {
     try {
       const { data, error } = await supabase
         .from('bouquets')
         .select('*')
         .eq('is_public', true)
+        .gt('created_at', GALLERY_CUTOFF)
         .order('created_at', { ascending: false });
       if (!error && data) return data;
     } catch {
@@ -163,8 +167,8 @@ export async function getPublicBouquets(): Promise<BouquetData[]> {
     }
   }
 
-  // Fallback to local storage (only public ones) plus a default example if empty
-  const localList = getLocalBouquets().filter(b => b.is_public);
+  // Fallback to local storage (only public ones created after cutoff)
+  const localList = getLocalBouquets().filter(b => b.is_public && b.created_at && b.created_at > GALLERY_CUTOFF);
   return localList;
 }
 
