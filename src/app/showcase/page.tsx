@@ -4,20 +4,41 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import { getPublicBouquets, BouquetData } from '@/lib/supabase';
 import { SEEDED_ASSETS } from '@/lib/assets-seed';
-import { Heart, Compass, Gift, ChevronRight, MessageCircle } from 'lucide-react';
+import { Heart, Compass, Gift, ChevronRight, MessageCircle, RefreshCw, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ShowcasePage() {
   const [bouquets, setBouquets] = useState<BouquetData[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'love' | 'thanks' | 'birthday'>('all');
+  const [isClearing, setIsClearing] = useState(false);
+
+  const fetchGallery = async () => {
+    setLoading(true);
+    const data = await getPublicBouquets();
+    setBouquets(data);
+    setLoading(false);
+  };
 
   useEffect(() => {
-    getPublicBouquets().then(data => {
-      setBouquets(data);
-      setLoading(false);
-    });
+    fetchGallery();
   }, []);
+
+  const handleClearGallery = async () => {
+    if (!window.confirm("Are you sure you want to clear all gallery items? This will remove public bouquets from the showcase.")) return;
+    setIsClearing(true);
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('bloomly_saved_bouquets');
+      }
+      await fetch('/api/bouquets', { method: 'DELETE' });
+      setBouquets([]);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsClearing(false);
+    }
+  };
 
   // Filter public items based on keywords inside messages or titles
   const filteredBouquets = bouquets.filter(b => {
@@ -52,6 +73,21 @@ export default function ShowcasePage() {
           <p className="text-sm text-stone-500">
             Browse through custom bouquets designed by other creators around the world. Get inspired and create your own!
           </p>
+          <div className="flex items-center justify-center gap-2 pt-2">
+            <button
+              onClick={fetchGallery}
+              className="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 text-stone-600 dark:text-stone-300 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Refresh
+            </button>
+            <button
+              onClick={handleClearGallery}
+              disabled={isClearing}
+              className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+            >
+              <Trash2 className="w-3.5 h-3.5" /> Clear Gallery
+            </button>
+          </div>
         </div>
 
         {/* Filter buttons */}
