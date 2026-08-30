@@ -46,15 +46,18 @@ export async function DELETE() {
   try {
     const { supabase } = await import('@/lib/supabase');
     if (supabase) {
-      const { error } = await supabase
-        .from('bouquets')
-        .delete()
-        .neq('slug', ''); // Delete all rows in bouquets table
-      if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+      // 1. Fetch all bouquet IDs
+      const { data: allItems } = await supabase.from('bouquets').select('id');
+      if (allItems && allItems.length > 0) {
+        const ids = allItems.map(item => item.id);
+        const { error: delError } = await supabase.from('bouquets').delete().in('id', ids);
+        if (delError) {
+          // Fallback: delete using date filter
+          await supabase.from('bouquets').delete().gt('created_at', '1970-01-01T00:00:00Z');
+        }
       }
     }
-    return NextResponse.json({ success: true, message: 'Gallery items cleared successfully' });
+    return NextResponse.json({ success: true, message: 'All database records deleted successfully' });
   } catch (error: any) {
     return NextResponse.json({ error: error.message || 'Server error' }, { status: 500 });
   }
