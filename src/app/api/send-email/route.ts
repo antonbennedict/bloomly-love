@@ -87,7 +87,33 @@ export async function POST(request: Request) {
 </body>
 </html>`;
 
-    // 1. Primary Option: Brevo REST API v3
+    // 1. Primary Option: SMTP Relay (Brevo SMTP or Gmail SMTP - bypasses REST API IP Whitelisting)
+    if (smtpUser && smtpPass) {
+      try {
+        const smtpTransporter = nodemailer.createTransport({
+          host: smtpHost,
+          port: smtpPort,
+          secure: smtpPort === 465,
+          auth: {
+            user: smtpUser,
+            pass: smtpPass,
+          },
+        });
+
+        const info = await smtpTransporter.sendMail({
+          from: `"${brevoSenderName}" <${brevoSenderEmail}>`,
+          to: email,
+          subject,
+          text: textBody,
+          html: htmlBody,
+        });
+        return NextResponse.json({ success: true, provider: 'smtp', messageId: info.messageId });
+      } catch (smtpErr: any) {
+        console.error('[SMTP Transport Error]:', smtpErr);
+      }
+    }
+
+    // 2. Secondary Option: Brevo REST API v3
     if (brevoApiKey) {
       const res = await fetch('https://api.brevo.com/v3/smtp/email', {
         method: 'POST',
@@ -112,7 +138,7 @@ export async function POST(request: Request) {
       if (!res.ok) {
         console.error('[Brevo API Error]:', responseData);
         
-        // Try fallback senders on Brevo (e.g. bloomlylove21@gmail.com & abclulu.student@ua.edu.ph)
+        // Try candidate senders on Brevo
         const fallbackSenders = ['bloomlylove21@gmail.com', 'abclulu.student@ua.edu.ph'].filter(e => e !== brevoSenderEmail);
         for (const candidateEmail of fallbackSenders) {
           console.warn(`Retrying Brevo with candidate sender: ${candidateEmail}...`);
@@ -135,27 +161,9 @@ export async function POST(request: Request) {
           if (retryRes.ok) {
             return NextResponse.json({ success: true, provider: 'brevo-fallback', data: retryData });
           }
-          console.error(`[Brevo Candidate ${candidateEmail} Error]:`, retryData);
         }
         
-        // If Brevo REST API fails, try SMTP relay fallback if SMTP credentials are provided
-        if (transporter && smtpUser) {
-          try {
-            console.warn('Retrying email dispatch via Brevo SMTP relay...');
-            const info = await transporter.sendMail({
-              from: `"${brevoSenderName}" <${smtpUser}>`,
-              to: email,
-              subject,
-              text: textBody,
-              html: htmlBody,
-            });
-            return NextResponse.json({ success: true, provider: 'smtp-fallback', messageId: info.messageId });
-          } catch (smtpErr) {
-            console.error('[SMTP Fallback Error]:', smtpErr);
-          }
-        }
-
-        // If Brevo REST & SMTP fail, fall through to Resend
+        // If Brevo REST API fails, fall through to Resend
         if (resend) {
           const { data, error } = await resend.emails.send({
             from: 'Bloomly Gifts <onboarding@resend.dev>',
@@ -165,16 +173,15 @@ export async function POST(request: Request) {
             text: textBody,
           });
           if (!error) return NextResponse.json({ success: true, provider: 'resend-fallback', data });
-          console.error('[Resend Fallback Error]:', error);
         }
         
         let customErrMsg = responseData.message || 'Brevo API dispatch failed';
         if (responseData.code === 'unauthorized' && responseData.message?.includes('unrecognised IP address')) {
           customErrMsg = 'Brevo IP restriction: Disable IP whitelist in https://app.brevo.com/security/authorised_ips or add SMTP_USER & SMTP_PASS in Vercel.';
         } else if (responseData.code === 'unauthorized') {
-          customErrMsg = 'Brevo Unauthorized: Check BREVO_API_KEY in Vercel Environment Variables.';
+          customErrMsg = 'Brevo Unauthorized: Check BREVO_API_KEY / SMTP_PASS in Vercel Environment Variables.';
         }
-        return NextResponse.json({ error: customErrMsg }, { status: res.status });
+        return NextResponse.json({ success: false, error: customErrMsg }, { status: 200 });
       }
       return NextResponse.json({ success: true, provider: 'brevo', data: responseData });
     }
