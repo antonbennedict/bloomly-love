@@ -63,14 +63,28 @@ export async function POST(request: Request) {
   <title>${subject}</title>
 </head>
 <body style="margin: 0; padding: 24px; background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.6; color: #1a1a1a;">
-  <div style="max-width: 480px; margin: 0 auto;">
-    <p style="margin: 0 0 16px;">Hi <strong>${cleanRecipient}</strong>,</p>
+  <div style="max-width: 480px; margin: 0 auto; border: 1px solid #e2ebe5; border-radius: 16px; padding: 32px; background-color: #fafbfb;">
+    
+    <!-- Bloomly Brand Logo Header -->
+    <div style="text-align: center; margin-bottom: 24px;">
+      <div style="display: inline-block; width: 44px; h: 44px; background-color: #4a6c57; border-radius: 50%; text-align: center; line-height: 44px; color: #ffffff; font-size: 22px; font-weight: bold; box-shadow: 0 4px 12px rgba(74, 108, 87, 0.2);">
+        ❀
+      </div>
+      <div style="font-family: Georgia, serif; font-size: 20px; font-weight: bold; color: #2d4235; margin-top: 8px; letter-spacing: 0.5px;">
+        Bloomly
+      </div>
+      <div style="font-size: 11px; color: #718096; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px;">
+        Digital Floral Keepsakes
+      </div>
+    </div>
+
+    <p style="margin: 0 0 16px; color: #1a1a1a;">Hi <strong>${cleanRecipient}</strong>,</p>
     <p style="margin: 0 0 20px; color: #2d3748;">
       <strong>${cleanSender}</strong> created a personal flower bouquet and left a gift card for you on Bloomly.
     </p>
     
     <div style="margin: 28px 0; text-align: center;">
-      <a href="${shareUrl}" style="background-color: #4a6c57; color: #ffffff; font-size: 15px; font-weight: 600; text-decoration: none; padding: 12px 28px; border-radius: 10px; display: inline-block;">
+      <a href="${shareUrl}" style="background-color: #4a6c57; color: #ffffff; font-size: 15px; font-weight: 600; text-decoration: none; padding: 14px 32px; border-radius: 12px; display: inline-block; box-shadow: 0 4px 12px rgba(74, 108, 87, 0.25);">
         Open Your Bouquet & Card &rarr;
       </a>
     </div>
@@ -79,7 +93,7 @@ export async function POST(request: Request) {
       Direct link: <a href="${shareUrl}" style="color: #4a6c57; text-decoration: underline;">${shareUrl}</a>
     </p>
     
-    <p style="margin: 28px 0 0; color: #718096; font-size: 14px;">
+    <p style="margin: 28px 0 0; color: #718096; font-size: 14px; border-t: 1px solid #e2ebe5; pt: 16px;">
       Warmly,<br>
       <strong>${cleanSender}</strong>
     </p>
