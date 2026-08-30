@@ -111,9 +111,11 @@ export async function POST(request: Request) {
       const responseData = await res.json();
       if (!res.ok) {
         console.error('[Brevo API Error]:', responseData);
-        // If unverified sender error on Brevo, retry with verified account email
-        if (responseData.code === 'unauthorized' || responseData.message?.includes('sender') || responseData.code === 'invalid_parameter') {
-          console.warn('Retrying Brevo with verified account email...');
+        
+        // Try fallback senders on Brevo (e.g. bloomlylove21@gmail.com & abclulu.student@ua.edu.ph)
+        const fallbackSenders = ['bloomlylove21@gmail.com', 'abclulu.student@ua.edu.ph'].filter(e => e !== brevoSenderEmail);
+        for (const candidateEmail of fallbackSenders) {
+          console.warn(`Retrying Brevo with candidate sender: ${candidateEmail}...`);
           const retryRes = await fetch('https://api.brevo.com/v3/smtp/email', {
             method: 'POST',
             headers: {
@@ -122,7 +124,7 @@ export async function POST(request: Request) {
               'content-type': 'application/json',
             },
             body: JSON.stringify({
-              sender: { name: brevoSenderName, email: 'abclulu.student@ua.edu.ph' },
+              sender: { name: brevoSenderName, email: candidateEmail },
               to: [{ email }],
               subject,
               htmlContent: htmlBody,
@@ -133,6 +135,7 @@ export async function POST(request: Request) {
           if (retryRes.ok) {
             return NextResponse.json({ success: true, provider: 'brevo-fallback', data: retryData });
           }
+          console.error(`[Brevo Candidate ${candidateEmail} Error]:`, retryData);
         }
         
         // If Brevo fails, fall through to Resend
@@ -150,7 +153,9 @@ export async function POST(request: Request) {
         
         let customErrMsg = responseData.message || 'Brevo API dispatch failed';
         if (responseData.code === 'unauthorized' && responseData.message?.includes('unrecognised IP address')) {
-          customErrMsg = 'Brevo IP restriction: Add your IP address (120.29.108.213) in https://app.brevo.com/security/authorised_ips or disable IP whitelist in Brevo.';
+          customErrMsg = 'Brevo IP restriction: Add Vercel IPs or disable IP whitelist in https://app.brevo.com/security/authorised_ips';
+        } else if (responseData.code === 'unauthorized') {
+          customErrMsg = 'Brevo Unauthorized: Check BREVO_API_KEY in Vercel Environment Variables.';
         }
         return NextResponse.json({ error: customErrMsg }, { status: res.status });
       }

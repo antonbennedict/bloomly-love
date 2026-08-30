@@ -190,6 +190,7 @@ export default function Builder() {
   const [recipientEmail, setRecipientEmail] = useState('');
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [emailSendSuccess, setEmailSendSuccess] = useState<boolean | null>(null);
+  const [emailErrorMessage, setEmailErrorMessage] = useState<string | null>(null);
 
   // Fetch current user anonymous ID
   const [userId, setUserId] = useState<string | null>(null);
@@ -368,6 +369,7 @@ export default function Builder() {
     
     setIsSendingEmail(true);
     setEmailSendSuccess(null);
+    setEmailErrorMessage(null);
     
     try {
       const res = await fetch('/api/send-email', {
@@ -384,13 +386,16 @@ export default function Builder() {
       const data = await res.json();
       if (res.ok && data.success) {
         setEmailSendSuccess(true);
+        setEmailErrorMessage(null);
         setRecipientEmail('');
       } else {
         setEmailSendSuccess(false);
+        setEmailErrorMessage(data.error || 'Failed to send email. Check Vercel environment variables or use Copy Link.');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       setEmailSendSuccess(false);
+      setEmailErrorMessage(err.message || 'Failed to send email.');
     } finally {
       setIsSendingEmail(false);
     }
@@ -1157,7 +1162,9 @@ export default function Builder() {
                   </p>
                 )}
                 {emailSendSuccess === false && (
-                  <p className="text-[10px] text-rose-500 font-semibold">Failed. Try using the copy link instead.</p>
+                  <p className="text-[10px] text-rose-500 font-semibold leading-relaxed">
+                    {emailErrorMessage || 'Failed. Try using the copy link instead.'}
+                  </p>
                 )}
               </form>
               <div className="grid grid-cols-2 gap-2.5">
