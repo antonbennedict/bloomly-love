@@ -138,7 +138,24 @@ export async function POST(request: Request) {
           console.error(`[Brevo Candidate ${candidateEmail} Error]:`, retryData);
         }
         
-        // If Brevo fails, fall through to Resend
+        // If Brevo REST API fails, try SMTP relay fallback if SMTP credentials are provided
+        if (transporter && smtpUser) {
+          try {
+            console.warn('Retrying email dispatch via Brevo SMTP relay...');
+            const info = await transporter.sendMail({
+              from: `"${brevoSenderName}" <${smtpUser}>`,
+              to: email,
+              subject,
+              text: textBody,
+              html: htmlBody,
+            });
+            return NextResponse.json({ success: true, provider: 'smtp-fallback', messageId: info.messageId });
+          } catch (smtpErr) {
+            console.error('[SMTP Fallback Error]:', smtpErr);
+          }
+        }
+
+        // If Brevo REST & SMTP fail, fall through to Resend
         if (resend) {
           const { data, error } = await resend.emails.send({
             from: 'Bloomly Gifts <onboarding@resend.dev>',
@@ -153,7 +170,7 @@ export async function POST(request: Request) {
         
         let customErrMsg = responseData.message || 'Brevo API dispatch failed';
         if (responseData.code === 'unauthorized' && responseData.message?.includes('unrecognised IP address')) {
-          customErrMsg = 'Brevo IP restriction: Add Vercel IPs or disable IP whitelist in https://app.brevo.com/security/authorised_ips';
+          customErrMsg = 'Brevo IP restriction: Disable IP whitelist in https://app.brevo.com/security/authorised_ips or add SMTP_USER & SMTP_PASS in Vercel.';
         } else if (responseData.code === 'unauthorized') {
           customErrMsg = 'Brevo Unauthorized: Check BREVO_API_KEY in Vercel Environment Variables.';
         }
