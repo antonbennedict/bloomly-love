@@ -87,7 +87,36 @@ export async function POST(request: Request) {
 </body>
 </html>`;
 
-    // 1. Primary Option: SMTP Relay (Gmail SMTP or Brevo SMTP)
+    // 1. Primary Option: Brevo REST API v3 (High Deliverability Transactional Email - Deactivated IP Restrictions)
+    if (brevoApiKey) {
+      try {
+        const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+          method: 'POST',
+          headers: {
+            'accept': 'application/json',
+            'api-key': brevoApiKey,
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            sender: { name: 'Bloomly', email: brevoSenderEmail },
+            to: [{ email }],
+            subject,
+            htmlContent: htmlBody,
+            textContent: textBody,
+          }),
+        });
+
+        const responseData = await res.json();
+        if (res.ok) {
+          return NextResponse.json({ success: true, provider: 'brevo', data: responseData });
+        }
+        console.error('[Brevo API Error]:', responseData);
+      } catch (brevoErr) {
+        console.error('[Brevo API Fetch Error]:', brevoErr);
+      }
+    }
+
+    // 2. Secondary Option: SMTP Relay (Gmail SMTP / Brevo SMTP)
     if (smtpUser && smtpPass) {
       try {
         const smtpTransporter = nodemailer.createTransport({
@@ -113,89 +142,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // 2. Secondary Option: Brevo REST API v3
-    if (brevoApiKey) {
-      const res = await fetch('https://api.brevo.com/v3/smtp/email', {
-        method: 'POST',
-        headers: {
-          'accept': 'application/json',
-          'api-key': brevoApiKey,
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          sender: { name: 'Bloomly', email: brevoSenderEmail },
-          to: [{ email }],
-          subject,
-          htmlContent: htmlBody,
-          textContent: textBody,
-        }),
-      });
-
-      const responseData = await res.json();
-      if (!res.ok) {
-        console.error('[Brevo API Error]:', responseData);
-        
-        // Try candidate senders on Brevo
-        const fallbackSenders = ['bloomlylove21@gmail.com', 'abclulu.student@ua.edu.ph'].filter(e => e !== brevoSenderEmail);
-        for (const candidateEmail of fallbackSenders) {
-          console.warn(`Retrying Brevo with candidate sender: ${candidateEmail}...`);
-          const retryRes = await fetch('https://api.brevo.com/v3/smtp/email', {
-            method: 'POST',
-            headers: {
-              'accept': 'application/json',
-              'api-key': brevoApiKey,
-              'content-type': 'application/json',
-            },
-            body: JSON.stringify({
-              sender: { name: brevoSenderName, email: candidateEmail },
-              to: [{ email }],
-              subject,
-              htmlContent: htmlBody,
-              textContent: textBody,
-            }),
-          });
-          const retryData = await retryRes.json();
-          if (retryRes.ok) {
-            return NextResponse.json({ success: true, provider: 'brevo-fallback', data: retryData });
-          }
-        }
-        
-        // If Brevo REST API fails, fall through to Resend
-        if (resend) {
-          const { data, error } = await resend.emails.send({
-            from: 'Bloomly Gifts <onboarding@resend.dev>',
-            to: [email],
-            subject,
-            html: htmlBody,
-            text: textBody,
-          });
-          if (!error) return NextResponse.json({ success: true, provider: 'resend-fallback', data });
-        }
-        
-        let customErrMsg = responseData.message || 'Brevo API dispatch failed';
-        if (responseData.code === 'unauthorized' && responseData.message?.includes('unrecognised IP address')) {
-          customErrMsg = 'Brevo IP restriction: Disable IP whitelist in https://app.brevo.com/security/authorised_ips or add SMTP_USER & SMTP_PASS in Vercel.';
-        } else if (responseData.code === 'unauthorized') {
-          customErrMsg = 'Brevo Unauthorized: Check BREVO_API_KEY / SMTP_PASS in Vercel Environment Variables.';
-        }
-        return NextResponse.json({ success: false, error: customErrMsg }, { status: 200 });
-      }
-      return NextResponse.json({ success: true, provider: 'brevo', data: responseData });
-    }
-
-    // 2. Secondary Option: SMTP / Nodemailer
-    if (transporter && smtpUser) {
-      const info = await transporter.sendMail({
-        from: `"${brevoSenderName}" <${smtpUser}>`,
-        to: email,
-        subject,
-        text: textBody,
-        html: htmlBody,
-      });
-      return NextResponse.json({ success: true, provider: 'smtp', messageId: info.messageId });
-    }
-
-    // 3. Fallback: Resend API
+    // 3. Tertiary Fallback: Resend API
     if (resend) {
       const { data, error } = await resend.emails.send({
         from: 'Bloomly Gifts <onboarding@resend.dev>',
@@ -203,19 +150,12 @@ export async function POST(request: Request) {
         subject,
         html: htmlBody,
         text: textBody,
-        replyTo: 'support@resend.dev',
-        headers: {
-          'List-Unsubscribe': `<${shareUrl}>`,
-          'X-Entity-Ref-ID': slug || 'bloomly-bouquet',
-        },
       });
 
-      if (error) {
-        console.error('[Resend API Error]:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+      if (!error) {
+        return NextResponse.json({ success: true, provider: 'resend', data });
       }
-
-      return NextResponse.json({ success: true, provider: 'resend', data });
+      console.error('[Resend API Error]:', error);
     }
 
     return NextResponse.json({ error: 'No email service provider configured' }, { status: 500 });
