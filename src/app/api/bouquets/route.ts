@@ -41,3 +41,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message || 'Server error' }, { status: 500 });
   }
 }
+
+export async function DELETE() {
+  try {
+    const { supabase } = await import('@/lib/supabase');
+    if (supabase) {
+      const { error } = await supabase
+        .from('bouquets')
+        .delete()
+        .neq('slug', ''); // Delete all rows in bouquets table
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+    }
+    return NextResponse.json({ success: true, message: 'Gallery items cleared successfully' });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message || 'Server error' }, { status: 500 });
+  }
+}
