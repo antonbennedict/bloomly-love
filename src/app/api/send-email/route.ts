@@ -50,9 +50,9 @@ export async function POST(request: Request) {
     const cleanSender = senderName ? senderName.trim() : 'Someone special';
     const cleanRecipient = recipientName ? recipientName.trim() : 'Friend';
     
-    // Personal subject line (avoids marketing keywords)
-    const subject = `${cleanSender} sent you flowers`;
-    const textBody = `Hi ${cleanRecipient},\n\n${cleanSender} just sent you a personal bouquet gift.\n\nOpen your flowers here:\n${shareUrl}\n\nFrom,\n${cleanSender}`;
+    // Anti-Spam optimized subject line & headers
+    const subject = `${cleanSender} sent you a bouquet on Bloomly`;
+    const textBody = `Hi ${cleanRecipient},\n\n${cleanSender} created a personal flower bouquet for you on Bloomly.\n\nView your bouquet here:\n${shareUrl}\n\nWarmly,\n${cleanSender}`;
 
     // Clean personal letter template (Gmail classifies marketing tables with large hero buttons as Promotions)
     const htmlBody = `<!DOCTYPE html>
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
     
     <!-- Bloomly Brand Logo Header -->
     <div style="text-align: center; margin-bottom: 24px;">
-      <div style="display: inline-block; width: 44px; h: 44px; background-color: #4a6c57; border-radius: 50%; text-align: center; line-height: 44px; color: #ffffff; font-size: 22px; font-weight: bold; box-shadow: 0 4px 12px rgba(74, 108, 87, 0.2);">
+      <div style="display: inline-block; width: 44px; height: 44px; background-color: #4a6c57; border-radius: 50%; text-align: center; line-height: 44px; color: #ffffff; font-size: 22px; font-weight: bold; box-shadow: 0 4px 12px rgba(74, 108, 87, 0.2);">
         ❀
       </div>
       <div style="font-family: Georgia, serif; font-size: 20px; font-weight: bold; color: #2d4235; margin-top: 8px; letter-spacing: 0.5px;">
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
       Direct link: <a href="${shareUrl}" style="color: #4a6c57; text-decoration: underline;">${shareUrl}</a>
     </p>
     
-    <p style="margin: 28px 0 0; color: #718096; font-size: 14px; border-t: 1px solid #e2ebe5; pt: 16px;">
+    <p style="margin: 28px 0 0; color: #718096; font-size: 14px; border-top: 1px solid #e2ebe5; padding-top: 16px;">
       Warmly,<br>
       <strong>${cleanSender}</strong>
     </p>
@@ -115,11 +115,16 @@ export async function POST(request: Request) {
         });
 
         const info = await smtpTransporter.sendMail({
-          from: `"${brevoSenderName}" <${brevoSenderEmail}>`,
+          from: `"${brevoSenderName}" <${brevoSenderEmail || smtpUser}>`,
           to: email,
+          replyTo: smtpUser,
           subject,
           text: textBody,
           html: htmlBody,
+          headers: {
+            'List-Unsubscribe': `<${shareUrl}>`,
+            'X-Entity-Ref-ID': slug || 'bloomly',
+          }
         });
         return NextResponse.json({ success: true, provider: 'smtp', messageId: info.messageId });
       } catch (smtpErr: any) {
