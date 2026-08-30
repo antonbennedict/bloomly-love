@@ -50,11 +50,11 @@ export async function POST(request: Request) {
     const cleanSender = senderName ? senderName.trim() : 'Someone special';
     const cleanRecipient = recipientName ? recipientName.trim() : 'Friend';
     
-    // Clean subject line & text body (avoids spam keywords)
-    const subject = `You received a flower bouquet from ${cleanSender}`;
-    const textBody = `Hi ${cleanRecipient},\n\n${cleanSender} created a personal flower bouquet for you on Bloomly.\n\nOpen your bouquet & gift card here:\n${shareUrl}\n\nWarmly,\nBloomly`;
+    // Primary-Inbox optimized subject line & body
+    const subject = `${cleanSender} sent you a bouquet of flowers`;
+    const textBody = `Hi ${cleanRecipient},\n\n${cleanSender} created a personal flower bouquet and card for you on Bloomly.\n\nOpen your bouquet here:\n${shareUrl}\n\nWarmly,\n${cleanSender}`;
 
-    // Clean email template
+    // Clean personal note format (passes Gmail Primary Inbox AI checks)
     const htmlBody = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -62,26 +62,26 @@ export async function POST(request: Request) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${subject}</title>
 </head>
-<body style="margin: 0; padding: 20px; background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 15px; color: #1a1a1a; line-height: 1.6;">
-  <div style="max-width: 460px; margin: 0 auto;">
-    <p style="margin-bottom: 16px;">Hi <strong>${cleanRecipient}</strong>,</p>
-    <p style="margin-bottom: 20px; color: #2d3748;">
-      <strong>${cleanSender}</strong> created a personal flower bouquet and left a gift card for you on Bloomly.
+<body style="margin: 0; padding: 20px; background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 15px; color: #222222; line-height: 1.6;">
+  <div style="max-width: 480px; margin: 0 auto;">
+    <p style="margin-bottom: 16px;">Hi ${cleanRecipient},</p>
+    <p style="margin-bottom: 20px;">
+      <strong>${cleanSender}</strong> created a personal flower bouquet and left a card for you on Bloomly.
     </p>
     
-    <div style="margin: 24px 0;">
-      <a href="${shareUrl}" style="background-color: #4a6c57; color: #ffffff; font-size: 14px; font-weight: 600; text-decoration: none; padding: 12px 24px; border-radius: 10px; display: inline-block;">
+    <p style="margin: 24px 0;">
+      <a href="${shareUrl}" style="background-color: #4a6c57; color: #ffffff; font-size: 15px; font-weight: 600; text-decoration: none; padding: 12px 24px; border-radius: 8px; display: inline-block;">
         Open Your Bouquet & Card &rarr;
       </a>
-    </div>
+    </p>
 
-    <p style="margin-top: 20px; font-size: 13px; color: #718096;">
-      Direct link: <a href="${shareUrl}" style="color: #4a6c57; text-decoration: underline;">${shareUrl}</a>
+    <p style="margin-top: 20px; font-size: 13px; color: #666666;">
+      Direct link: <a href="${shareUrl}" style="color: #4a6c57;">${shareUrl}</a>
     </p>
     
-    <p style="margin-top: 24px; color: #4a5568; font-size: 14px;">
+    <p style="margin-top: 28px; color: #555555;">
       Warmly,<br>
-      <strong>Bloomly</strong>
+      <strong>${cleanSender}</strong>
     </p>
   </div>
 </body>
@@ -101,7 +101,7 @@ export async function POST(request: Request) {
         });
 
         const info = await smtpTransporter.sendMail({
-          from: `"Bloomly" <${smtpUser}>`,
+          from: `"${cleanSender} (Bloomly)" <${smtpUser}>`,
           to: email,
           subject,
           text: textBody,
