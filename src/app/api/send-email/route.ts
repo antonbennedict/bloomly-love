@@ -101,7 +101,7 @@ export async function POST(request: Request) {
         });
 
         const info = await smtpTransporter.sendMail({
-          from: `"${cleanSender} (Bloomly)" <${smtpUser}>`,
+          from: `"Bloomly" <${smtpUser}>`,
           to: email,
           subject,
           text: textBody,
