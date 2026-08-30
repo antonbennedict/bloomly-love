@@ -50,11 +50,11 @@ export async function POST(request: Request) {
     const cleanSender = senderName ? senderName.trim() : 'Someone special';
     const cleanRecipient = recipientName ? recipientName.trim() : 'Friend';
     
-    // Personal subject line & body (avoids marketing keywords and bulk headers)
-    const subject = `${cleanSender} sent you a bouquet on Bloomly`;
-    const textBody = `Hi ${cleanRecipient},\n\n${cleanSender} created a personal flower bouquet for you on Bloomly.\n\nView your bouquet & gift card here:\n${shareUrl}\n\nWarmly,\n${cleanSender}`;
+    // Clean subject line & text body (avoids spam keywords)
+    const subject = `You received a flower bouquet from ${cleanSender}`;
+    const textBody = `Hi ${cleanRecipient},\n\n${cleanSender} created a personal flower bouquet for you on Bloomly.\n\nOpen your bouquet & gift card here:\n${shareUrl}\n\nWarmly,\nBloomly`;
 
-    // Clean personal email template (No newsletter tables or bulk styling)
+    // Clean email template
     const htmlBody = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,18 +76,18 @@ export async function POST(request: Request) {
     </div>
 
     <p style="margin-top: 20px; font-size: 13px; color: #718096;">
-      Link: <a href="${shareUrl}" style="color: #4a6c57; text-decoration: underline;">${shareUrl}</a>
+      Direct link: <a href="${shareUrl}" style="color: #4a6c57; text-decoration: underline;">${shareUrl}</a>
     </p>
     
     <p style="margin-top: 24px; color: #4a5568; font-size: 14px;">
       Warmly,<br>
-      <strong>${cleanSender}</strong>
+      <strong>Bloomly</strong>
     </p>
   </div>
 </body>
 </html>`;
 
-    // 1. Primary Option: SMTP Relay (Gmail SMTP - Personal direct delivery)
+    // 1. Primary Option: SMTP Relay (Gmail SMTP or Brevo SMTP)
     if (smtpUser && smtpPass) {
       try {
         const smtpTransporter = nodemailer.createTransport({
@@ -101,9 +101,8 @@ export async function POST(request: Request) {
         });
 
         const info = await smtpTransporter.sendMail({
-          from: `"${cleanSender} via Bloomly" <${smtpUser}>`,
+          from: `"Bloomly" <${smtpUser}>`,
           to: email,
-          replyTo: smtpUser,
           subject,
           text: textBody,
           html: htmlBody,
@@ -124,14 +123,11 @@ export async function POST(request: Request) {
           'content-type': 'application/json',
         },
         body: JSON.stringify({
-          sender: { name: brevoSenderName, email: brevoSenderEmail },
+          sender: { name: 'Bloomly', email: brevoSenderEmail },
           to: [{ email }],
           subject,
           htmlContent: htmlBody,
           textContent: textBody,
-          headers: {
-            'List-Unsubscribe': `<${shareUrl}>`,
-          }
         }),
       });
 
