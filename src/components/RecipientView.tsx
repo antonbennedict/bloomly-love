@@ -112,15 +112,30 @@ export default function RecipientView({ initialBouquet, slug }: RecipientViewPro
     }, 1400); // Animation reveal duration
   };
 
-  const handleSendReply = (e: React.FormEvent) => {
+  const handleSendReply = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!replyText.trim()) return;
+    if (!replyText.trim() || isReplying) return;
+    
     setIsReplying(true);
-    setTimeout(() => {
-      setIsReplying(false);
+    try {
+      await fetch('/api/send-reply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slug,
+          replyText: replyText.trim(),
+          recipientName: bouquet?.recipient_name || 'Recipient',
+          senderName: bouquet?.sender_name || 'Creator'
+        })
+      });
       setReplySent(true);
-      setTimeout(() => setReplySent(false), 4000);
-    }, 800);
+      setReplyText('');
+      setTimeout(() => setReplySent(false), 5000);
+    } catch (err) {
+      console.error('Failed to dispatch reply:', err);
+    } finally {
+      setIsReplying(false);
+    }
   };
 
   if (loading) {
