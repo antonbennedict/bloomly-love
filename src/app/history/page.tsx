@@ -86,12 +86,12 @@ export default function HistoryPage() {
               return (
                 <div 
                   key={b.slug}
-                  className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-100 hover:border-sage-200 p-5 flex items-center justify-between shadow-sm hover:shadow-md transition-all group"
+                  className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-100 hover:border-sage-200 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm hover:shadow-md transition-all group"
                 >
-                  <div className="flex items-center gap-4 min-w-0">
+                  <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                     
                     {/* Tiny composition icon bundle */}
-                    <div className="w-16 h-16 bg-sage-50/50 dark:bg-stone-950/30 rounded-xl overflow-hidden relative shrink-0 border border-stone-100 flex items-center justify-center">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-sage-50/50 dark:bg-stone-950/30 rounded-xl overflow-hidden relative shrink-0 border border-stone-100 flex items-center justify-center">
                       <div className="absolute inset-0 scale-[0.45] origin-center flex items-center justify-center">
                         {elements.slice(0, 5).map((el) => {
                           const asset = SEEDED_ASSETS.find(a => a.id === el.assetId);
@@ -121,21 +121,21 @@ export default function HistoryPage() {
                     </div>
 
                     {/* Metadata details */}
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <h3 className="font-serif font-bold text-stone-850 dark:text-stone-200 text-sm truncate group-hover:text-sage-600 transition-colors">
                         For: {b.recipient_name}
                       </h3>
-                      <p className="text-xs text-stone-500 italic truncate max-w-[200px] mt-0.5">
+                      <p className="text-xs text-stone-500 italic truncate max-w-[180px] sm:max-w-[200px] mt-0.5">
                         "{b.message}"
                       </p>
-                      <div className="flex items-center gap-2 mt-2">
+                      <div className="flex flex-wrap items-center gap-2 mt-2">
                         <span className="text-[9px] font-bold text-stone-400 flex items-center gap-1">
                           <Calendar className="w-3 h-3" /> {dateStr}
                         </span>
                         <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
                           b.is_public ? 'bg-sage-50 text-sage-600 dark:bg-stone-850' : 'bg-stone-100 text-stone-500'
                         }`}>
-                          {b.is_public ? 'Public Gallery' : 'Private'}
+                          {b.is_public ? 'Public' : 'Private'}
                         </span>
                       </div>
                     </div>
@@ -145,8 +145,9 @@ export default function HistoryPage() {
                   {/* Open details actions */}
                   <Link
                     href={`/b/${b.slug}`}
-                    className="p-3 bg-sage-50 hover:bg-sage-100 text-sage-700 rounded-xl transition-all group-hover:bg-sage-600 group-hover:text-white"
+                    className="self-end sm:self-center px-4 py-2 bg-sage-50 hover:bg-sage-100 text-sage-700 rounded-xl transition-all group-hover:bg-sage-600 group-hover:text-white flex items-center gap-1.5 text-xs font-bold shrink-0"
                   >
+                    <span>View</span>
                     <Eye className="w-4 h-4" />
                   </Link>
 

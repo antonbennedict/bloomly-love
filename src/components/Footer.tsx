@@ -26,7 +26,7 @@ export default function Footer() {
 
           {/* Quick Links (Hidden for Recipient view) */}
           {!isRecipientPage && (
-            <div className="flex items-center gap-6 text-xs font-semibold">
+            <div className="flex flex-wrap items-center justify-center sm:justify-end gap-4 sm:gap-6 text-xs font-semibold">
               <Link href="/create" className="hover:text-sage-400 transition-colors flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-sage-500" /> Create Bouquet
               </Link>
@@ -38,7 +38,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom Credits */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-stone-500">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-stone-500 text-center sm:text-left">
           <p>&copy; {new Date().getFullYear()} Bloomly. All rights reserved.</p>
           <div className="flex items-center gap-1.5 text-stone-400 bg-stone-900/80 px-4 py-2 rounded-full border border-stone-800 shadow-inner text-xs font-semibold">
             <span>Made with</span>

@@ -108,6 +108,7 @@ export default function Builder() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'template' | 'flower' | 'wrapper' | 'filler' | 'accessory' | 'upload'>('template');
+  const [mobileView, setMobileView] = useState<'library' | 'canvas' | 'card'>('canvas');
   
   // Save history state before changing elements
   const pushHistory = (newElements: BouquetElement[]) => {
@@ -262,6 +263,7 @@ export default function Builder() {
 
     pushHistory([...elements, newElement]);
     setSelectedId(newElement.id);
+    setMobileView('canvas');
   };
 
   // Drag start
@@ -486,8 +488,47 @@ export default function Builder() {
   return (
     <div className="flex-1 flex flex-col md:flex-row h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] overflow-hidden bg-[#f7f5f2] dark:bg-stone-950">
 
-      {/* â•â•â• LEFT SIDEBAR: Asset Library â•â•â• */}
-      <div className="w-full md:w-72 bg-white dark:bg-stone-900 flex flex-col h-[45vh] md:h-full overflow-hidden shrink-0 border-r border-stone-200/80 dark:border-stone-800">
+      {/* MOBILE TOP NAVIGATION BAR */}
+      <div className="md:hidden flex items-center justify-around bg-white dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 p-2 shrink-0 z-30 shadow-sm">
+        <button
+          onClick={() => setMobileView('library')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            mobileView === 'library'
+              ? 'bg-[#4a6c57] text-white shadow-md shadow-[#4a6c57]/20'
+              : 'text-stone-500 hover:text-stone-800 dark:text-stone-400'
+          }`}
+        >
+          <Flower className="w-3.5 h-3.5" />
+          <span>Library</span>
+        </button>
+        
+        <button
+          onClick={() => setMobileView('canvas')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            mobileView === 'canvas'
+              ? 'bg-[#4a6c57] text-white shadow-md shadow-[#4a6c57]/20'
+              : 'text-stone-500 hover:text-stone-800 dark:text-stone-400'
+          }`}
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Canvas ({elements.length})</span>
+        </button>
+        
+        <button
+          onClick={() => setMobileView('card')}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            mobileView === 'card'
+              ? 'bg-[#4a6c57] text-white shadow-md shadow-[#4a6c57]/20'
+              : 'text-stone-500 hover:text-stone-800 dark:text-stone-400'
+          }`}
+        >
+          <Mail className="w-3.5 h-3.5" />
+          <span>Card & Share</span>
+        </button>
+      </div>
+
+      {/* ═══ LEFT SIDEBAR: Asset Library ═══ */}
+      <div className={`w-full md:w-72 bg-white dark:bg-stone-900 flex-col h-full overflow-hidden shrink-0 border-r border-stone-200/80 dark:border-stone-800 ${mobileView === 'library' ? 'flex' : 'hidden md:flex'}`}>
         
         {/* Sidebar Header */}
         <div className="px-4 pt-4 pb-3 border-b border-stone-100 dark:border-stone-800">
@@ -609,8 +650,8 @@ export default function Builder() {
         </div>
       </div>
 
-      {/* â•â•â• CENTER: Canvas Workspace â•â•â• */}
-      <div className="flex-1 flex flex-col bg-[#f7f5f2] dark:bg-stone-950 overflow-hidden">
+      {/* ═══ CENTER: Canvas Workspace ═══ */}
+      <div className={`flex-1 flex-col bg-[#f7f5f2] dark:bg-stone-950 overflow-hidden ${mobileView === 'canvas' ? 'flex' : 'hidden md:flex'}`}>
         
         {/* Canvas Toolbar */}
         <div className="flex items-center justify-between px-4 py-2.5 bg-white/80 dark:bg-stone-900/80 backdrop-blur border-b border-stone-200/60 dark:border-stone-800 shrink-0">
@@ -715,12 +756,58 @@ export default function Builder() {
                 );
               })}
           </div>
+          
+          {/* Mobile Floating Canvas Controls */}
+          <div className="md:hidden absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2 bg-white/90 dark:bg-stone-900/90 backdrop-blur-md p-2 rounded-2xl border border-stone-200/80 dark:border-stone-800 shadow-xl z-20">
+            {selectedElement ? (
+              <div className="flex items-center gap-1.5 overflow-x-auto w-full">
+                <button
+                  onClick={() => updateSelectedElement({ rotation: (selectedElement.rotation + 45) % 360 })}
+                  className="px-2.5 py-1.5 rounded-xl bg-stone-100 dark:bg-stone-800 text-[10px] font-bold text-stone-700 dark:text-stone-300 shrink-0 flex items-center gap-1"
+                >
+                  <RotateCw className="w-3 h-3" /> {selectedElement.rotation}°
+                </button>
+                <button
+                  onClick={() => updateSelectedElement({ flipX: !selectedElement.flipX })}
+                  className={`px-2.5 py-1.5 rounded-xl text-[10px] font-bold shrink-0 ${selectedElement.flipX ? 'bg-[#4a6c57] text-white' : 'bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300'}`}
+                >
+                  Flip
+                </button>
+                <button
+                  onClick={deleteSelected}
+                  className="px-2.5 py-1.5 rounded-xl bg-rose-50 text-rose-600 text-[10px] font-bold shrink-0 flex items-center gap-1"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
+                <button
+                  onClick={() => setMobileView('card')}
+                  className="ml-auto px-3 py-1.5 rounded-xl bg-[#4a6c57] text-white text-[10px] font-bold shrink-0 flex items-center gap-1"
+                >
+                  Inspector <ChevronRight className="w-3 h-3" />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between w-full">
+                <button
+                  onClick={() => setMobileView('library')}
+                  className="px-3 py-1.5 rounded-xl bg-sage-50 text-[#4a6c57] text-[10px] font-bold flex items-center gap-1"
+                >
+                  + Add Flowers
+                </button>
+                <button
+                  onClick={() => setMobileView('card')}
+                  className="px-3.5 py-1.5 rounded-xl bg-[#4a6c57] text-white text-[10px] font-bold flex items-center gap-1 shadow-sm"
+                >
+                  Write Card & Share <ChevronRight className="w-3 h-3" />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* â•â•â• RIGHT SIDEBAR: Inspector & Card â•â•â• */}
-      <div className="w-full md:w-80 bg-white dark:bg-stone-900 flex flex-col h-[55vh] md:h-full overflow-y-auto shrink-0 border-t md:border-t-0 md:border-l border-stone-200/80 dark:border-stone-800">
-
+      {/* ═══ RIGHT SIDEBAR: Inspector & Card ═══ */}
+      <div className={`w-full md:w-80 bg-white dark:bg-stone-900 flex-col h-full overflow-y-auto shrink-0 border-t md:border-t-0 md:border-l border-stone-200/80 dark:border-stone-800 ${mobileView === 'card' ? 'flex' : 'hidden md:flex'}`}>
         {/* Inspector Header */}
         <div className="px-4 pt-4 pb-3 border-b border-stone-100 dark:border-stone-800 shrink-0">
           <h2 className="text-xs font-bold uppercase tracking-widest text-stone-400 dark:text-stone-500">Inspector</h2>

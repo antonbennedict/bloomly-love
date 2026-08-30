@@ -81,19 +81,19 @@ export default function HomePage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             
             {/* Column 1: Hero Copy & CTA */}
-            <div className="lg:col-span-7 text-left space-y-6">
-              <h1 className="text-5xl sm:text-6xl font-serif font-extrabold tracking-tight text-stone-900 dark:text-stone-100 leading-tight">
+            <div className="lg:col-span-7 text-left space-y-4 sm:space-y-6">
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-extrabold tracking-tight text-stone-900 dark:text-stone-100 leading-tight">
                 Design & Share Virtual <span className="text-sage-600 italic">Flower Bouquets</span>
               </h1>
               
-              <p className="text-base sm:text-lg text-stone-500 dark:text-stone-400 font-medium leading-relaxed max-w-xl">
+              <p className="text-sm sm:text-lg text-stone-500 dark:text-stone-400 font-medium leading-relaxed max-w-xl">
                 Hand-select flowers, write a heartfelt message, and wrap it beautifully. Share your customized gift box via link, direct email, or scanable QR code in seconds.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 pt-2">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
                 <Link
                   href="/create"
-                  className="bg-sage-600 hover:bg-sage-700 text-white font-bold py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-sage-600/15 transition-all hover:scale-[1.01] cursor-pointer text-sm"
+                  className="bg-sage-600 hover:bg-sage-700 text-white font-bold py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-sage-600/15 transition-all hover:scale-[1.01] cursor-pointer text-sm w-full sm:w-auto"
                 >
                   Create a Bouquet <ArrowRight className="w-4 h-4" />
                 </Link>
@@ -102,7 +102,7 @@ export default function HomePage() {
 
             {/* Column 2: visual bouquet mockup preview */}
             <div className="lg:col-span-5 flex justify-center relative">
-              <div className="relative w-80 h-96 bg-white dark:bg-stone-900 rounded-3xl shadow-2xl border border-stone-100 dark:border-stone-850 p-6 flex flex-col justify-between overflow-hidden group hover:scale-[1.02] transition-transform duration-500">
+              <div className="relative w-full max-w-[320px] h-80 sm:h-96 bg-white dark:bg-stone-900 rounded-3xl shadow-2xl border border-stone-100 dark:border-stone-850 p-5 sm:p-6 flex flex-col justify-between overflow-hidden group hover:scale-[1.02] transition-transform duration-500">
                 {/* Visual bouquet mockup with absolute items */}
                 <div className="absolute inset-0 scale-[0.8] origin-center -translate-y-8 flex items-center justify-center pointer-events-none">
                   {/* Eucalyptus filler behind */}

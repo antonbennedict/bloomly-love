@@ -55,7 +55,7 @@ export default function ShowcasePage() {
         </div>
 
         {/* Filter buttons */}
-        <div className="flex justify-center gap-2 mb-8 border-b border-stone-200/40 pb-4">
+        <div className="flex items-center justify-start sm:justify-center gap-2 mb-8 border-b border-stone-200/40 pb-4 overflow-x-auto no-scrollbar py-1 px-1">
           {[
             { id: 'all', label: 'All Creations' },
             { id: 'love', label: 'Love & Romance' },
@@ -65,7 +65,7 @@ export default function ShowcasePage() {
             <button
               key={btn.id}
               onClick={() => setFilter(btn.id as any)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-[0.98] ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-[0.98] shrink-0 whitespace-nowrap ${
                 filter === btn.id
                   ? 'bg-sage-600 text-white shadow-md shadow-sage-600/15'
                   : 'bg-white hover:bg-stone-50 text-stone-600 dark:bg-stone-900 dark:text-stone-300 dark:hover:bg-stone-800'

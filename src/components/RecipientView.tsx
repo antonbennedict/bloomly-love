@@ -334,17 +334,17 @@ export default function RecipientView({ initialBouquet, slug }: RecipientViewPro
 
             {/* POP-UP CARD MODAL */}
             {isCardOpen && (
-              <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+              <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 z-50 overflow-y-auto">
                 <motion.div 
                   initial={{ scale: 0.8, opacity: 0, y: 30 }}
                   animate={{ scale: 1, opacity: 1, y: 0 }}
                   exit={{ scale: 0.8, opacity: 0, y: 30 }}
-                  className="bg-[#FAF6F0] text-stone-850 rounded-3xl max-w-xl w-full p-8 border-2 border-amber-900/20 shadow-2xl relative space-y-6"
+                  className="bg-[#FAF6F0] text-stone-850 rounded-3xl max-w-xl w-full p-5 sm:p-8 border-2 border-amber-900/20 shadow-2xl relative space-y-4 sm:space-y-6 my-auto"
                 >
                   {/* Close button */}
                   <button 
                     onClick={() => setIsCardOpen(false)}
-                    className="absolute top-5 right-5 w-8 h-8 rounded-full bg-amber-900/10 hover:bg-amber-900/20 flex items-center justify-center text-amber-950 font-bold text-xs transition-colors cursor-pointer z-10"
+                    className="absolute top-4 right-4 sm:top-5 sm:right-5 w-8 h-8 rounded-full bg-amber-900/10 hover:bg-amber-900/20 flex items-center justify-center text-amber-950 font-bold text-xs transition-colors cursor-pointer z-10"
                   >
                     ✕
                   </button>
@@ -359,14 +359,14 @@ export default function RecipientView({ initialBouquet, slug }: RecipientViewPro
                   {/* Recipient */}
                   <div>
                     <span className="text-[9px] font-bold uppercase tracking-widest text-amber-900/60">Dearest</span>
-                    <h3 className="text-2xl font-serif font-bold text-amber-950">
+                    <h3 className="text-xl sm:text-2xl font-serif font-bold text-amber-950">
                       {recipient_name || 'Someone Special'}
                     </h3>
                   </div>
 
                   {/* Cursive Message */}
-                  <div className="bg-[#F4EFE6] p-5 rounded-2xl border border-amber-900/10 shadow-inner">
-                    <p className="font-cursive text-3xl leading-relaxed text-amber-950 whitespace-pre-line">
+                  <div className="bg-[#F4EFE6] p-4 sm:p-5 rounded-2xl border border-amber-900/10 shadow-inner">
+                    <p className="font-cursive text-2xl sm:text-3xl leading-relaxed text-amber-950 whitespace-pre-line">
                       "{message || 'Thinking of you and sending custom floral wishes!'}"
                     </p>
                   </div>
@@ -375,13 +375,13 @@ export default function RecipientView({ initialBouquet, slug }: RecipientViewPro
                   <div className="flex items-center justify-between border-t border-amber-900/10 pt-3">
                     <div>
                       <span className="text-[9px] font-bold uppercase tracking-widest text-amber-900/60">With All My Love,</span>
-                      <p className="font-cursive text-3xl text-amber-950 leading-none mt-1">{sender_name || 'A Secret Admirer'}</p>
+                      <p className="font-cursive text-2xl sm:text-3xl text-amber-950 leading-none mt-1">{sender_name || 'A Secret Admirer'}</p>
                     </div>
-                    <Heart className="w-6 h-6 text-rose-600 fill-rose-600 animate-pulse" />
+                    <Heart className="w-5 h-5 sm:w-6 sm:h-6 text-rose-600 fill-rose-600 animate-pulse" />
                   </div>
 
                   {/* Reply Section inside Modal */}
-                  <div className="bg-white/80 p-4 rounded-2xl border border-amber-900/10 space-y-2">
+                  <div className="bg-white/80 p-3.5 sm:p-4 rounded-2xl border border-amber-900/10 space-y-2">
                     <span className="text-[9px] font-bold uppercase tracking-widest text-stone-500">Reply to {sender_name || 'Sender'}</span>
                     <form onSubmit={handleSendReply} className="flex gap-2">
                       <input
@@ -389,7 +389,7 @@ export default function RecipientView({ initialBouquet, slug }: RecipientViewPro
                         value={replyText}
                         onChange={(e) => setReplyText(e.target.value)}
                         placeholder="Say thank you..."
-                        className="flex-1 text-xs p-2.5 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-[#4a6c57]/40"
+                        className="flex-1 text-xs p-2.5 rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-[#4a6c57]/40 min-w-0"
                       />
                       <button
                         type="submit"
