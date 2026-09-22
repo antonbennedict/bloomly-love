@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Flower, BookOpen, Compass, History, Sparkles } from 'lucide-react';
+import { Flower, BookOpen, Compass, Sparkles } from 'lucide-react';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -10,7 +10,6 @@ export default function Navbar() {
   const links = [
     { href: '/create', label: 'Create', icon: Sparkles },
     { href: '/showcase', label: 'Gallery', icon: Compass },
-    { href: '/history', label: 'History', icon: History },
   ];
 
   return (

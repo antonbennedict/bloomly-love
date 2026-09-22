@@ -63,7 +63,7 @@ export default function HomePage() {
     },
     {
       q: "Can I edit my bouquet after sharing it?",
-      a: "Yes! If you open the link from the same browser you created it on, you'll be able to re-edit or modify it, or save the updated card. You can also view all your creations on the 'My History' page."
+      a: "Yes! If you open the link from the same browser you created it on, you'll be able to re-edit or modify it, or save the updated card."
     },
     {
       q: "Is it possible to download my bouquet as an image?",

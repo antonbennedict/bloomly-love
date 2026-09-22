@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Flower, Heart, Sparkles, History } from 'lucide-react';
+import { Flower, Heart, Sparkles } from 'lucide-react';
 
 export default function Footer() {
   const pathname = usePathname();
@@ -29,9 +29,6 @@ export default function Footer() {
             <div className="flex flex-wrap items-center justify-center sm:justify-end gap-4 sm:gap-6 text-xs font-semibold">
               <Link href="/create" className="hover:text-sage-400 transition-colors flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-sage-500" /> Create Bouquet
-              </Link>
-              <Link href="/history" className="hover:text-sage-400 transition-colors flex items-center gap-1.5">
-                <History className="w-3.5 h-3.5 text-sage-500" /> My History
               </Link>
             </div>
           )}
