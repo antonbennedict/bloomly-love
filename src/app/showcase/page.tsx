@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import { getPublicBouquets, BouquetData } from '@/lib/supabase';
-import { SEEDED_ASSETS } from '@/lib/assets-seed';
+import { getAsset } from '@/lib/assets-seed';
 import { Heart, Compass, Gift, ChevronRight, MessageCircle, RefreshCw, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -140,8 +140,7 @@ export default function ShowcasePage() {
             {filteredBouquets.map((b) => {
               const elements = (b.composition as any[]) || [];
               const wrapperAsset = elements.find(el => {
-                const a = SEEDED_ASSETS.find(sa => sa.id === el.assetId);
-                return a?.category === 'wrapper';
+                return getAsset(el.assetId).category === 'wrapper';
               });
               const wrapperColor = wrapperAsset ? wrapperAsset.tint : '#e2e8f0';
 
@@ -153,20 +152,23 @@ export default function ShowcasePage() {
                   
                   {/* Miniature Visual representation preview */}
                   <div className="aspect-[4/3] bg-sage-50/30 dark:bg-stone-950/40 relative overflow-hidden border-b border-stone-100/50">
-                    <div className="absolute inset-0 scale-[0.6] origin-center flex items-center justify-center">
-                      {elements.slice(0, 10).map((el) => {
-                        const asset = SEEDED_ASSETS.find(a => a.id === el.assetId);
+                    {/* Same 5:6 coordinate box and proportional sizing as the builder, so previews match */}
+                    <div className="absolute inset-y-2 left-1/2 -translate-x-1/2 aspect-[5/6]">
+                      {elements.map((el) => {
+                        const asset = getAsset(el.assetId);
                         return (
                           <div 
                             key={el.id}
                             style={{
                               left: `${(el.x / 500) * 100}%`,
                               top: `${(el.y / 600) * 100}%`,
-                              transform: `translate(-50%, -50%) rotate(${el.rotation}deg) scale(${el.scale})`,
+                              width: '19.2%',
+                              height: '16%',
+                              transform: `translate(-50%, -50%) rotate(${el.rotation || 0}deg) scale(${el.flipX ? -(el.scale || 1) : (el.scale || 1)}, ${el.flipY ? -(el.scale || 1) : (el.scale || 1)})`,
                               zIndex: el.z,
                               position: 'absolute',
                             }}
-                            className="w-16 h-16 pointer-events-none"
+                            className="pointer-events-none"
                           >
                             {el.assetId === 'custom-upload' ? (
                               <img src={el.customImageUrl} alt="" className="w-full h-full object-contain" />

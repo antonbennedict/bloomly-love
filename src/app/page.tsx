@@ -1,318 +1,267 @@
-'use client';
-
-import React, { useState, useEffect } from 'react';
-import Navbar from '@/components/Navbar';
-import { getPublicBouquets, submitFeedback, BouquetData } from '@/lib/supabase';
-import { SEEDED_ASSETS } from '@/lib/assets-seed';
-import { 
-  Flower, 
-  Sparkles, 
-  Mail, 
-  ChevronRight, 
-  ChevronDown, 
-  Send, 
-  Gift, 
-  CheckCircle2, 
-  ArrowRight,
-  MessageCircle
-} from 'lucide-react';
+import type { CSSProperties } from 'react';
 import Link from 'next/link';
+import { ArrowRight, Check, Flower2, Gift, Infinity as InfinityIcon, Mail, PackageOpen, Palette, PenLine, QrCode } from 'lucide-react';
+import Navbar from '@/components/Navbar';
+import IntroGate from '@/components/landing/IntroGate';
+import BloomBouquet from '@/components/landing/BloomBouquet';
+import FallingPetals from '@/components/landing/FallingPetals';
+import Faq, { type FaqItem } from '@/components/landing/Faq';
+import ContactForm from '@/components/landing/ContactForm';
+
+const delay = (seconds: number) => ({ '--d': `${seconds}s` }) as CSSProperties;
+
+const STEPS = [
+  {
+    num: '01',
+    title: 'Pick your blooms',
+    desc: 'Mix roses, tulips, sunflowers and greenery. Drag, rotate and resize until it looks just right.',
+    icon: Flower2,
+    tint: 'bg-sage-50 text-sage-700 dark:bg-sage-900/40 dark:text-sage-200',
+  },
+  {
+    num: '02',
+    title: 'Write the card',
+    desc: 'Add a personal note and choose a card style that fits the moment — a birthday, an apology, or just because.',
+    icon: PenLine,
+    tint: 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-300',
+  },
+  {
+    num: '03',
+    title: 'Send it their way',
+    desc: 'Share a private link, email it directly, or download a QR code to tuck inside a real-world gift.',
+    icon: Gift,
+    tint: 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300',
+  },
+];
+
+const FEATURES = [
+  {
+    title: 'A real unboxing moment',
+    desc: 'Your bouquet arrives in a gift box. One tap and the wrapping unfolds, the flowers bloom one by one, and your letter appears.',
+    icon: PackageOpen,
+  },
+  {
+    title: 'Hand-drawn, never generic',
+    desc: 'Every flower, wrap and ribbon is an original illustration — tinted in the colors you choose.',
+    icon: Palette,
+  },
+  {
+    title: 'Delivered your way',
+    desc: 'A share link for messages, a direct email for surprises, and a printable QR code for cards and gifts.',
+    icon: QrCode,
+  },
+  {
+    title: 'Blooms that never wilt',
+    desc: 'Unlike a real bouquet, this one still looks perfect next week, next month, and every time they revisit it.',
+    icon: InfinityIcon,
+  },
+];
+
+const FAQS: FaqItem[] = [
+  {
+    q: 'Do I need an account?',
+    a: 'No. You can design, write and send a bouquet without signing up. Bloomly quietly links your creations to this browser so you can come back to them later.',
+  },
+  {
+    q: 'What does the recipient see?',
+    a: 'They open your link to a closed gift box. Tapping it unfolds the wrapping, blooms your flowers one by one, and reveals your handwritten-style letter.',
+  },
+  {
+    q: 'Can I edit a bouquet after I share it?',
+    a: 'Yes. Open the link in the same browser you used to create it and you can keep editing — the link stays the same.',
+  },
+  {
+    q: 'Can I print it or add it to a physical gift?',
+    a: 'Yes. Every bouquet comes with a QR code you can download as a high-resolution PNG — perfect for greeting cards, gift tags or a real bouquet.',
+  },
+  {
+    q: 'Is Bloomly free?',
+    a: 'Yes — creating and sending bouquets is free.',
+  },
+];
 
 export default function HomePage() {
-  const [gallery, setGallery] = useState<BouquetData[]>([]);
-  
-  // FAQ state
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
-
-  // Contact form state
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
-
-  useEffect(() => {
-    getPublicBouquets().then(data => setGallery(data.slice(0, 3)));
-  }, []);
-
-  const handleContactSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!message) return;
-    
-    setIsSubmitting(true);
-    const ok = await submitFeedback(name, email, message);
-    setIsSubmitting(false);
-    
-    if (ok) {
-      setSuccess(true);
-      setName('');
-      setEmail('');
-      setMessage('');
-      setTimeout(() => setSuccess(false), 5000);
-    }
-  };
-
-  const faqs = [
-    {
-      q: "Do I need to sign up for an account to create a bouquet?",
-      a: "No! Bloomly is designed for instant expression. You can design, write letters, and share complete bouquets with zero sign-up friction. An anonymous user ID will keep your creations linked to your browser session."
-    },
-    {
-      q: "How does the recipient open my bouquet?",
-      a: "When they click your share link, they'll see an unboxing animation of a closed gift box. Clicking the box unfolds the wrappers, blooms the flowers in a staggered sequence, and reveals your handwritten letter."
-    },
-    {
-      q: "Can I edit my bouquet after sharing it?",
-      a: "Yes! If you open the link from the same browser you created it on, you'll be able to re-edit or modify it, or save the updated card."
-    },
-    {
-      q: "Is it possible to download my bouquet as an image?",
-      a: "Yes! Once you finish building, we generate a unique share link and a scanable QR code which you can download as a high-resolution PNG for letters, prints, or physical gifts."
-    }
-  ];
-
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <IntroGate className="min-h-screen flex flex-col bg-background">
       <Navbar />
 
-      {/* HERO SECTION */}
-      <section className="relative overflow-hidden pt-20 pb-16 md:pt-28 md:pb-24 bg-gradient-to-tr from-sage-50/50 via-white to-pink-50/40 dark:from-stone-950 dark:via-stone-900 dark:to-stone-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            
-            {/* Column 1: Hero Copy & CTA */}
-            <div className="lg:col-span-7 text-left space-y-4 sm:space-y-6">
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-serif font-extrabold tracking-tight text-stone-900 dark:text-stone-100 leading-tight">
-                Design & Share Virtual <span className="text-sage-600 italic">Flower Bouquets</span>
-              </h1>
-              
-              <p className="text-sm sm:text-lg text-stone-500 dark:text-stone-400 font-medium leading-relaxed max-w-xl">
-                Hand-select flowers, write a heartfelt message, and wrap it beautifully. Share your customized gift box via link, direct email, or scanable QR code in seconds.
-              </p>
+      <main id="main" className="flex-1">
+        {/* HERO */}
+        <section className="relative overflow-hidden bg-gradient-to-b from-[#FBF6EF] via-white to-white dark:from-stone-950 dark:via-stone-950 dark:to-stone-900">
+          <FallingPetals />
 
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
-                <Link
-                  href="/create"
-                  className="bg-sage-600 hover:bg-sage-700 text-white font-bold py-3.5 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-sage-600/15 transition-all hover:scale-[1.01] cursor-pointer text-sm w-full sm:w-auto"
-                >
-                  Create a Bouquet <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-            </div>
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-16 sm:pt-20 lg:pt-24 lg:pb-28">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+              <div className="lg:col-span-6 xl:col-span-7 text-center lg:text-left">
+                <p className="reveal inline-flex items-center gap-2 rounded-full border border-sage-200 bg-white/80 dark:bg-stone-900/80 dark:border-stone-700 px-3.5 py-1.5 text-xs sm:text-sm font-semibold text-sage-700 dark:text-sage-200 shadow-sm" style={delay(0)}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-500" aria-hidden="true" />
+                  Free · No sign-up · Ready in a minute
+                </p>
 
-            {/* Column 2: visual bouquet mockup preview */}
-            <div className="lg:col-span-5 flex justify-center relative">
-              <div className="relative w-full max-w-[320px] h-80 sm:h-96 bg-white dark:bg-stone-900 rounded-3xl shadow-2xl border border-stone-100 dark:border-stone-850 p-5 sm:p-6 flex flex-col justify-between overflow-hidden group hover:scale-[1.02] transition-transform duration-500">
-                {/* Visual bouquet mockup with absolute items */}
-                <div className="absolute inset-0 scale-[0.8] origin-center -translate-y-8 flex items-center justify-center pointer-events-none">
-                  {/* Eucalyptus filler behind */}
-                  <div className="absolute w-24 h-24 text-stone-400 left-[60px] top-[80px] rotate-[-25deg]">
-                    <svg viewBox="0 0 100 100" className="w-full h-full">
-                      <g dangerouslySetInnerHTML={{ __html: SEEDED_ASSETS[6].svgMarkup }} />
-                    </svg>
-                  </div>
-                  {/* Wrapping paper base */}
-                  <div className="absolute w-36 h-36 text-[#D97706] left-[90px] top-[180px] scale-[1.3] z-[1]">
-                    <svg viewBox="0 0 100 100" className="w-full h-full">
-                      <g dangerouslySetInnerHTML={{ __html: SEEDED_ASSETS[8].svgMarkup }} />
-                    </svg>
-                  </div>
-                  {/* Rose flower */}
-                  <div className="absolute w-24 h-24 text-[#E11D48] left-[130px] top-[85px] rotate-[5deg] z-[2]">
-                    <svg viewBox="0 0 100 100" className="w-full h-full">
-                      <g dangerouslySetInnerHTML={{ __html: SEEDED_ASSETS[0].svgMarkup }} />
-                    </svg>
-                  </div>
-                  {/* Tulip flower */}
-                  <div className="absolute w-24 h-24 text-[#EC4899] left-[85px] top-[110px] rotate-[-20deg] z-[3]">
-                    <svg viewBox="0 0 100 100" className="w-full h-full">
-                      <g dangerouslySetInnerHTML={{ __html: SEEDED_ASSETS[1].svgMarkup }} />
-                    </svg>
-                  </div>
-                  {/* Sunflower flower */}
-                  <div className="absolute w-24 h-24 text-[#EAB308] left-[180px] top-[125px] rotate-[20deg] z-[4]">
-                    <svg viewBox="0 0 100 100" className="w-full h-full">
-                      <g dangerouslySetInnerHTML={{ __html: SEEDED_ASSETS[2].svgMarkup }} />
-                    </svg>
-                  </div>
-                </div>
+                <h1 className="reveal mt-6 font-serif font-bold tracking-tight text-stone-900 dark:text-stone-50 text-[2.6rem] leading-[1.08] sm:text-6xl lg:text-[4.25rem] text-balance" style={delay(0.08)}>
+                  Send a bouquet <span className="italic text-sage-600 dark:text-sage-200">that never wilts.</span>
+                </h1>
 
-                {/* Floating card indicator */}
-                <div className="absolute bottom-6 left-6 right-6 bg-[#FDFBF7] dark:bg-stone-950 p-4 rounded-2xl border border-amber-900/10 dark:border-stone-800 shadow-lg text-left mt-auto">
-                  <span className="text-[9px] font-bold text-sage-600 dark:text-sage-400 uppercase tracking-widest">Unbox digital love</span>
-                  <p className="font-serif italic text-xs text-stone-750 dark:text-stone-300 mt-1">"Reveal your flower arrangement and read the custom card letter..."</p>
-                </div>
-              </div>
+                <p className="reveal mt-6 mx-auto lg:mx-0 max-w-xl text-base sm:text-lg leading-relaxed text-stone-600 dark:text-stone-400 text-pretty" style={delay(0.16)}>
+                  Arrange hand-drawn flowers, tuck in a heartfelt letter, and send it with a link, an email, or a QR code. They&apos;ll unwrap it like a real gift.
+                </p>
 
-              {/* Ambient sparkles */}
-              <div className="absolute -top-6 -right-6 w-12 h-12 text-yellow-400 animate-pulse">
-                <svg viewBox="0 0 100 100" className="w-full h-full">
-                  <g dangerouslySetInnerHTML={{ __html: SEEDED_ASSETS[10].svgMarkup }} />
-                </svg>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        {/* Decorative background shapes */}
-        <div className="absolute right-0 top-1/2 w-48 h-48 opacity-[0.03] pointer-events-none">
-          <svg viewBox="0 0 100 100" className="w-full h-full text-sage-600 fill-current">
-            <path d="M50,15 C55,40 25,40 50,65 C50,40 75,40 50,15 Z" />
-          </svg>
-        </div>
-      </section>
-
-      {/* HOW IT WORKS SECTION */}
-      <section className="py-20 bg-white dark:bg-stone-900 border-y border-stone-100 dark:border-stone-850">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-xl mx-auto mb-16 space-y-2">
-            <h2 className="text-3xl font-serif font-bold text-stone-850 dark:text-stone-100">How it works</h2>
-            <p className="text-sm text-stone-500">Creating and sharing digital affection has never been this simple.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                num: "01",
-                title: "Design the Bouquet",
-                desc: "Choose from original hand-drawn flowers, wrappers, and fillers. Drag, rotate, scale and arrange them on the canvas.",
-                icon: Flower,
-                color: "bg-sage-50 text-sage-600 dark:bg-stone-850"
-              },
-              {
-                num: "02",
-                title: "Write a Letter",
-                desc: "Type a heartfelt note, name the sender/recipient, and select a card visual theme palette to express the occasion.",
-                icon: Mail,
-                color: "bg-pink-50 text-pink-600 dark:bg-stone-850"
-              },
-              {
-                num: "03",
-                title: "Deliver the Joy",
-                desc: "Instantly generate a private link and downloadable QR code. Send it via email or messaging clients.",
-                icon: Gift,
-                color: "bg-amber-50 text-amber-600 dark:bg-stone-850"
-              }
-            ].map((step, idx) => {
-              const Icon = step.icon;
-              return (
-                <div key={idx} className="bg-stone-50/50 dark:bg-stone-950/20 p-8 rounded-3xl border border-stone-100/80 dark:border-stone-850/80 flex flex-col space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-2xl font-serif font-bold text-stone-300 dark:text-stone-700">{step.num}</span>
-                    <div className={`p-3 rounded-2xl ${step.color}`}>
-                      <Icon className="w-5 h-5" />
-                    </div>
-                  </div>
-                  <h3 className="font-serif font-bold text-lg text-stone-800 dark:text-stone-200">{step.title}</h3>
-                  <p className="text-xs text-stone-500 leading-relaxed">{step.desc}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-
-
-      {/* FAQ ACCORDION SECTION */}
-      <section className="py-20 bg-white dark:bg-stone-900 border-t border-stone-100 dark:border-stone-850">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12 space-y-2">
-            <h2 className="text-3xl font-serif font-bold text-stone-850 dark:text-stone-100">Got questions?</h2>
-            <p className="text-sm text-stone-500">Everything you need to know about Bloomly.</p>
-          </div>
-
-          <div className="space-y-4">
-            {faqs.map((faq, idx) => {
-              const isOpen = openFaq === idx;
-              return (
-                <div key={idx} className="border border-stone-100 dark:border-stone-800 rounded-2xl overflow-hidden transition-all">
-                  <button
-                    onClick={() => setOpenFaq(isOpen ? null : idx)}
-                    className="w-full p-5 text-left flex items-center justify-between font-serif font-bold text-sm text-stone-850 dark:text-stone-200 hover:bg-stone-50/50"
+                <div className="reveal mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start" style={delay(0.24)}>
+                  <Link
+                    href="/create"
+                    className="group inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-sage-600 px-7 py-3.5 text-[15px] font-semibold text-white shadow-lg shadow-sage-600/20 transition-all hover:bg-sage-700 hover:shadow-xl hover:shadow-sage-600/25 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-600"
                   >
-                    <span>{faq.q}</span>
-                    <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                  </button>
-                  {isOpen && (
-                    <div className="p-5 pt-0 text-xs text-stone-500 leading-relaxed border-t border-stone-50 bg-stone-50/10 dark:border-stone-850">
-                      {faq.a}
-                    </div>
-                  )}
+                    Start your bouquet
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                  </Link>
+                  <Link
+                    href="/showcase"
+                    className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-stone-300 bg-white/70 px-7 py-3.5 text-[15px] font-semibold text-stone-800 transition-colors hover:border-sage-600 hover:text-sage-700 dark:border-stone-700 dark:bg-stone-900/60 dark:text-stone-200 dark:hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sage-600"
+                  >
+                    Browse the gallery
+                  </Link>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
 
-      {/* CONTACT / FEEDBACK FORM */}
-      <section className="py-20 bg-slate-50/20 dark:bg-stone-950/20 border-t border-stone-100 dark:border-stone-850">
-        <div className="max-w-xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-10 space-y-2">
-            <h2 className="text-3xl font-serif font-bold text-stone-850 dark:text-stone-100">Send a note to the florist</h2>
-            <p className="text-sm text-stone-500">Have suggestions, feedback, or custom requests? Drop us a line.</p>
-          </div>
+                <ul className="reveal mt-8 flex flex-wrap justify-center lg:justify-start gap-x-6 gap-y-2 text-sm text-stone-600 dark:text-stone-400" style={delay(0.32)}>
+                  {['Original illustrations', 'Unboxing animation', 'Printable QR code'].map((item) => (
+                    <li key={item} className="flex items-center gap-1.5">
+                      <Check className="w-4 h-4 text-sage-600 dark:text-sage-200" aria-hidden="true" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-          {success ? (
-            <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-6 rounded-3xl text-center space-y-2">
-              <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
-              <h3 className="font-serif font-bold">Feedback Sent!</h3>
-              <p className="text-xs">Thank you for sharing your thoughts. We will review it shortly!</p>
+              <div className="lg:col-span-6 xl:col-span-5 relative mx-auto w-full max-w-[420px]">
+                <BloomBouquet className="w-full h-auto drop-shadow-[0_24px_40px_rgba(74,108,87,0.12)]" />
+
+                <figure className="reveal note-float absolute -bottom-2 left-0 sm:-left-6 w-[62%] max-w-[230px] rotate-[-4deg] rounded-2xl border border-amber-900/10 bg-[#FDFBF7] p-4 shadow-xl dark:bg-stone-900 dark:border-stone-700" style={delay(1.7)}>
+                  <figcaption className="text-[11px] font-bold uppercase tracking-[0.14em] text-sage-700 dark:text-sage-200">To Grae</figcaption>
+                  <blockquote className="mt-1.5 font-cursive text-2xl leading-tight text-stone-800 dark:text-stone-200">
+                    Saw these and thought of you. Happy birthday!
+                  </blockquote>
+                  <p className="mt-1 text-right text-xs text-stone-500 dark:text-stone-400">— Ton</p>
+                </figure>
+              </div>
             </div>
-          ) : (
-            <form onSubmit={handleContactSubmit} className="bg-white dark:bg-stone-900 p-8 rounded-3xl border border-stone-100 dark:border-stone-800 space-y-4 shadow-sm">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wide">Name</label>
-                  <input
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Your Name"
-                    className="w-full text-xs p-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-sage-600 focus:border-transparent dark:border-stone-800 dark:bg-stone-950/20"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wide">Email</label>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    className="w-full text-xs p-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-sage-600 focus:border-transparent dark:border-stone-800 dark:bg-stone-950/20"
-                  />
-                </div>
-              </div>
+          </div>
+        </section>
 
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wide">Message</label>
-                <textarea
-                  required
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Tell us what you think..."
-                  rows={4}
-                  className="w-full text-xs p-3 rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-sage-600 focus:border-transparent resize-none dark:border-stone-800 dark:bg-stone-950/20"
-                />
-              </div>
+        {/* HOW IT WORKS */}
+        <section aria-labelledby="how-title" className="py-20 sm:py-28 bg-white dark:bg-stone-900 border-y border-stone-100 dark:border-stone-800">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="scroll-reveal text-center max-w-2xl mx-auto mb-14 sm:mb-16">
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-sage-600 dark:text-sage-200">How it works</p>
+              <h2 id="how-title" className="mt-3 font-serif font-bold text-3xl sm:text-4xl text-stone-900 dark:text-stone-50 text-balance">
+                From empty vase to their inbox in three steps
+              </h2>
+            </div>
 
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full py-3.5 bg-sage-600 hover:bg-sage-700 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow-md shadow-sage-600/10 active:scale-[0.99] transition-all cursor-pointer disabled:bg-stone-300"
+            <ol className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+              {STEPS.map((step) => {
+                const Icon = step.icon;
+                return (
+                  <li key={step.num} className="scroll-reveal relative rounded-3xl border border-stone-200/80 bg-stone-50/60 p-7 sm:p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-stone-900/5 dark:border-stone-800 dark:bg-stone-950/40">
+                    <div className="flex items-center justify-between">
+                      <span className={`grid place-items-center w-12 h-12 rounded-2xl ${step.tint}`}>
+                        <Icon className="w-5 h-5" aria-hidden="true" />
+                      </span>
+                      <span className="font-serif text-3xl font-bold text-stone-300 dark:text-stone-700" aria-hidden="true">{step.num}</span>
+                    </div>
+                    <h3 className="mt-6 font-serif font-bold text-xl text-stone-900 dark:text-stone-100">{step.title}</h3>
+                    <p className="mt-2 text-[15px] leading-relaxed text-stone-600 dark:text-stone-400">{step.desc}</p>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+        </section>
+
+        {/* WHY BLOOMLY */}
+        <section aria-labelledby="why-title" className="py-20 sm:py-28">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+            <div className="scroll-reveal lg:col-span-5 lg:sticky lg:top-28">
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-sage-600 dark:text-sage-200">Why Bloomly</p>
+              <h2 id="why-title" className="mt-3 font-serif font-bold text-3xl sm:text-4xl text-stone-900 dark:text-stone-50 text-balance">
+                They don&apos;t just get a link. <span className="italic text-sage-600 dark:text-sage-200">They get a moment.</span>
+              </h2>
+              <p className="mt-5 text-base sm:text-lg leading-relaxed text-stone-600 dark:text-stone-400">
+                A text says you remembered. A bouquet says you took the time. Bloomly gives every message the warmth of a hand-delivered gift — without the florist bill.
+              </p>
+              <Link href="/create" className="mt-7 inline-flex items-center gap-2 text-[15px] font-semibold text-sage-700 dark:text-sage-200 underline-offset-4 hover:underline">
+                Make one now <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              </Link>
+            </div>
+
+            <ul className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {FEATURES.map((feature) => {
+                const Icon = feature.icon;
+                return (
+                  <li key={feature.title} className="scroll-reveal rounded-3xl border border-stone-200 bg-white p-7 dark:border-stone-800 dark:bg-stone-900">
+                    <span className="grid place-items-center w-11 h-11 rounded-full bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-300">
+                      <Icon className="w-5 h-5" aria-hidden="true" />
+                    </span>
+                    <h3 className="mt-5 font-serif font-bold text-lg text-stone-900 dark:text-stone-100">{feature.title}</h3>
+                    <p className="mt-2 text-[15px] leading-relaxed text-stone-600 dark:text-stone-400">{feature.desc}</p>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section aria-labelledby="faq-title" className="py-20 sm:py-28 bg-white dark:bg-stone-900 border-y border-stone-100 dark:border-stone-800">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6">
+            <div className="scroll-reveal text-center mb-10 sm:mb-12">
+              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-sage-600 dark:text-sage-200">FAQ</p>
+              <h2 id="faq-title" className="mt-3 font-serif font-bold text-3xl sm:text-4xl text-stone-900 dark:text-stone-50">Good questions, quick answers</h2>
+            </div>
+            <Faq items={FAQS} />
+          </div>
+        </section>
+
+        {/* CONTACT */}
+        <section aria-labelledby="contact-title" className="py-20 sm:py-28">
+          <div className="max-w-xl mx-auto px-4 sm:px-6">
+            <div className="scroll-reveal text-center mb-10">
+              <span className="mx-auto grid place-items-center w-12 h-12 rounded-full bg-sage-50 text-sage-700 dark:bg-stone-900 dark:text-sage-200">
+                <Mail className="w-5 h-5" aria-hidden="true" />
+              </span>
+              <h2 id="contact-title" className="mt-4 font-serif font-bold text-3xl sm:text-4xl text-stone-900 dark:text-stone-50">Leave a note for the florist</h2>
+              <p className="mt-3 text-base text-stone-600 dark:text-stone-400">Ideas for new flowers, something that didn&apos;t work, or just a kind word — we read every message.</p>
+            </div>
+            <ContactForm />
+          </div>
+        </section>
+
+        {/* FINAL CTA */}
+        <section className="px-4 sm:px-6 lg:px-8 pb-20 sm:pb-28">
+          <div className="scroll-reveal relative overflow-hidden max-w-7xl mx-auto rounded-[2rem] bg-sage-800 px-6 py-14 sm:px-12 sm:py-20 text-center">
+            <svg className="cta-bloom absolute -right-16 -top-16 w-64 h-64 text-sage-700/60" viewBox="-60 -60 120 120" aria-hidden="true">
+              {Array.from({ length: 8 }, (_, i) => (
+                <path key={i} transform={`rotate(${i * 45})`} d="M0 -6 C-15 -16 -17 -40 0 -55 C17 -40 15 -16 0 -6Z" fill="currentColor" />
+              ))}
+            </svg>
+            <svg className="cta-bloom absolute -left-20 -bottom-20 w-72 h-72 text-sage-700/40" viewBox="-60 -60 120 120" aria-hidden="true">
+              {Array.from({ length: 8 }, (_, i) => (
+                <path key={i} transform={`rotate(${i * 45})`} d="M0 -6 C-15 -16 -17 -40 0 -55 C17 -40 15 -16 0 -6Z" fill="currentColor" />
+              ))}
+            </svg>
+            <div className="relative">
+              <h2 className="font-serif font-bold text-3xl sm:text-5xl text-white text-balance">Someone&apos;s day is about to get better.</h2>
+              <p className="mt-4 text-base sm:text-lg text-sage-100 max-w-xl mx-auto">It takes about a minute. They&apos;ll remember it much longer.</p>
+              <Link
+                href="/create"
+                className="group mt-8 inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-white px-7 py-3.5 text-[15px] font-semibold text-sage-800 shadow-lg transition-all hover:bg-sage-50 active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
-                {isSubmitting ? 'Sending...' : <><Send className="w-3.5 h-3.5" /> Submit Feedback</>}
-              </button>
-            </form>
-          )}
-        </div>
-      </section>
-
-
-    </div>
+                Start your bouquet — it&apos;s free
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
+    </IntroGate>
   );
 }

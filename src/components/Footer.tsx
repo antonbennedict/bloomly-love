@@ -8,6 +8,9 @@ export default function Footer() {
   const pathname = usePathname();
   const isRecipientPage = pathname?.startsWith('/b/');
 
+  // The builder is a full-height app screen; a footer below it only adds a stray scroll.
+  if (pathname === '/create') return null;
+
   return (
     <footer className="bg-stone-950 text-stone-400 border-t border-stone-850 pt-12 pb-8 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">

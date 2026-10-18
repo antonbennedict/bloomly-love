@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
+import { renderBouquetEmail } from '@/lib/email/bouquetEmail';
 
 const brevoApiKey = process.env.BREVO_API_KEY;
 const brevoSenderEmail = process.env.BREVO_SENDER_EMAIL || 'abclulu.student@ua.edu.ph';
@@ -47,45 +48,11 @@ export async function POST(request: Request) {
     }
 
     const shareUrl = `${origin}/b/${slug}`;
-    const cleanSender = senderName ? senderName.trim() : 'Someone special';
-    const cleanRecipient = recipientName ? recipientName.trim() : 'Friend';
-    
-    // Primary-Inbox optimized subject line & body
-    const subject = `${cleanSender} sent you a bouquet of flowers`;
-    const textBody = `Hi ${cleanRecipient},\n\n${cleanSender} created a personal flower bouquet and card for you on Bloomly.\n\nOpen your bouquet here:\n${shareUrl}\n\nWarmly,\n${cleanSender}`;
-
-    // Clean personal note format (passes Gmail Primary Inbox AI checks)
-    const htmlBody = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${subject}</title>
-</head>
-<body style="margin: 0; padding: 20px; background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 15px; color: #222222; line-height: 1.6;">
-  <div style="max-width: 480px; margin: 0 auto;">
-    <p style="margin-bottom: 16px;">Hi ${cleanRecipient},</p>
-    <p style="margin-bottom: 20px;">
-      <strong>${cleanSender}</strong> created a personal flower bouquet and left a card for you on Bloomly.
-    </p>
-    
-    <p style="margin: 24px 0;">
-      <a href="${shareUrl}" style="background-color: #4a6c57; color: #ffffff; font-size: 15px; font-weight: 600; text-decoration: none; padding: 12px 24px; border-radius: 8px; display: inline-block;">
-        Open Your Bouquet & Card &rarr;
-      </a>
-    </p>
-
-    <p style="margin-top: 20px; font-size: 13px; color: #666666;">
-      Direct link: <a href="${shareUrl}" style="color: #4a6c57;">${shareUrl}</a>
-    </p>
-    
-    <p style="margin-top: 28px; color: #555555;">
-      Warmly,<br>
-      <strong>${cleanSender}</strong>
-    </p>
-  </div>
-</body>
-</html>`;
+    const { subject, html: htmlBody, text: textBody } = renderBouquetEmail({
+      senderName: typeof senderName === 'string' ? senderName : '',
+      recipientName: typeof recipientName === 'string' ? recipientName : '',
+      shareUrl,
+    });
 
     // 1. Primary Option: Brevo REST API v3 (High Deliverability Transactional Email - Deactivated IP Restrictions)
     if (brevoApiKey) {

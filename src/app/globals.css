@@ -98,3 +98,333 @@ body {
   background-image: radial-gradient(#2c2a29 1.5px, transparent 1.5px);
   background-size: 24px 24px;
 }
+
+/* ==========================================================================
+   Landing page motion
+   Every timed animation uses calc(var(--d) + var(--intro-offset)), so the hero
+   waits for the intro splash when it plays and starts immediately otherwise.
+   ========================================================================== */
+
+.landing {
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --intro-offset: 0s;
+}
+.landing[data-intro="play"] {
+  --intro-offset: 2.1s;
+}
+
+/* ---------- Intro splash ---------- */
+.bloomly-intro {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  place-items: center;
+  background:
+    radial-gradient(60% 50% at 50% 45%, rgba(244, 167, 185, 0.28), transparent 70%),
+    #fbf6ef;
+  animation: intro-out 0.6s cubic-bezier(0.7, 0, 0.3, 1) 2s forwards;
+  cursor: pointer;
+}
+.landing[data-intro="play"] .bloomly-intro,
+.landing[data-intro="skipped"] .bloomly-intro {
+  display: grid;
+}
+.bloomly-intro[data-leaving] {
+  animation: intro-leave 0.3s ease-out forwards;
+}
+
+.bloomly-intro__stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: intro-stage-out 0.6s cubic-bezier(0.7, 0, 0.3, 1) 2s forwards;
+}
+.bloomly-intro__flower {
+  width: clamp(96px, 22vw, 140px);
+  height: auto;
+}
+.bloomly-intro__flower .bloom-spin {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: bloom-spin 2.6s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+.bloomly-intro__flower .bloom-petal {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: petal-open 0.7s var(--ease-back) both;
+  animation-delay: calc(0.1s + var(--i) * 0.05s);
+}
+.bloomly-intro__flower .bloom-center {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pop 0.5s var(--ease-back) 0.55s both;
+}
+
+.bloomly-intro__word {
+  margin-top: 1.25rem;
+  display: flex;
+  font-size: clamp(2.75rem, 9vw, 4.5rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  color: #2d4235;
+}
+.bloomly-intro__word span {
+  display: inline-block;
+  animation: letter-pop 0.6s var(--ease-back) both;
+  animation-delay: calc(0.7s + var(--i) * 0.055s);
+}
+.bloomly-intro__tag {
+  margin-top: 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #4a6c57;
+  animation: fade-up 0.6s var(--ease-out-expo) 1.25s both;
+}
+.bloomly-intro__skip {
+  position: absolute;
+  right: 1rem;
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #44403c;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(68, 64, 60, 0.15);
+  cursor: pointer;
+  animation: fade-up 0.4s ease-out 0.4s both;
+}
+.bloomly-intro__skip:focus-visible {
+  outline: 2px solid #4a6c57;
+  outline-offset: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .bloomly-intro {
+    background:
+      radial-gradient(60% 50% at 50% 45%, rgba(232, 114, 143, 0.18), transparent 70%),
+      #0c0a09;
+  }
+  .bloomly-intro__word { color: #f5f5f4; }
+  .bloomly-intro__tag { color: #c9d9cf; }
+  .bloomly-intro__skip {
+    color: #e7e5e4;
+    background: rgba(28, 25, 23, 0.7);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+}
+
+/* ---------- Hero entrance ---------- */
+.reveal {
+  animation: fade-up 0.9s var(--ease-out-expo) both;
+  animation-delay: calc(var(--d, 0s) + var(--intro-offset));
+}
+.note-float {
+  animation:
+    fade-up 0.9s var(--ease-out-expo) both,
+    note-bob 6s ease-in-out infinite alternate;
+  animation-delay:
+    calc(var(--d, 0s) + var(--intro-offset)),
+    calc(var(--d, 0s) + var(--intro-offset) + 0.9s);
+}
+
+/* ---------- Hero bouquet ---------- */
+.bq-fade,
+.bq-rise,
+.bq-stem,
+.bq-leaf,
+.bq-petal,
+.bq-pop,
+.bq-sparkle,
+.bq-sway {
+  transform-box: fill-box;
+}
+.bq-fade { animation: fade-in 1.2s ease-out both; }
+.bq-rise { animation: rise 0.9s var(--ease-out-expo) both; }
+.bq-stem {
+  stroke-dasharray: 1;
+  animation: draw 1s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+.bq-leaf {
+  transform-origin: 0% 80%;
+  animation: unfurl 0.7s var(--ease-back) both;
+}
+.bq-petal {
+  transform-origin: 50% 100%;
+  animation: petal-open 0.8s var(--ease-back) both;
+  animation-delay: calc(var(--d, 0s) + var(--intro-offset) + var(--i, 0) * 0.04s);
+}
+.bq-pop {
+  transform-origin: center;
+  animation: pop 0.55s var(--ease-back) both;
+}
+.bq-sparkle {
+  transform-origin: center;
+  animation: twinkle 2.8s ease-in-out infinite both;
+}
+.bq-sway {
+  transform-origin: 50% 100%;
+  animation: sway 7s ease-in-out infinite alternate both;
+}
+/* After the shorthands above, which would otherwise reset the delay. */
+.bq-fade,
+.bq-rise,
+.bq-stem,
+.bq-leaf,
+.bq-pop,
+.bq-sparkle,
+.bq-sway {
+  animation-delay: calc(var(--d, 0s) + var(--intro-offset));
+}
+
+/* ---------- Ambient petals ---------- */
+.petals {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.petal {
+  position: absolute;
+  top: -40px;
+  opacity: 0;
+  will-change: transform;
+  animation: petal-fall var(--dur) linear var(--delay) infinite;
+}
+
+/* ---------- Scroll reveals (progressive enhancement, no JS) ---------- */
+@supports (animation-timeline: view()) {
+  .scroll-reveal {
+    animation: fade-up linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 60%;
+  }
+}
+
+.cta-bloom {
+  animation: slow-spin 40s linear infinite;
+}
+
+/* ---------- Keyframes ---------- */
+@keyframes intro-out {
+  to { opacity: 0; visibility: hidden; pointer-events: none; }
+}
+@keyframes intro-leave {
+  to { opacity: 0; visibility: hidden; pointer-events: none; }
+}
+@keyframes intro-stage-out {
+  to { transform: scale(1.12); filter: blur(4px); }
+}
+@keyframes bloom-spin {
+  from { transform: rotate(-40deg) scale(0.9); }
+  to { transform: rotate(0deg) scale(1); }
+}
+@keyframes petal-open {
+  from { transform: scale(0) rotate(-30deg); opacity: 0; }
+  to { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+@keyframes pop {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+@keyframes letter-pop {
+  from { transform: translateY(0.6em) scale(0.5); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes fade-up {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes rise {
+  from { transform: translateY(28px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes unfurl {
+  from { transform: scale(0) rotate(-25deg); opacity: 0; }
+  to { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+@keyframes twinkle {
+  0%, 100% { transform: scale(0.4) rotate(0deg); opacity: 0.2; }
+  50% { transform: scale(1) rotate(45deg); opacity: 1; }
+}
+@keyframes sway {
+  from { transform: rotate(-1.5deg); }
+  to { transform: rotate(1.5deg); }
+}
+@keyframes note-bob {
+  from { translate: 0 0; }
+  to { translate: 0 -8px; }
+}
+@keyframes petal-fall {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.7; }
+  85% { opacity: 0.55; }
+  100% { transform: translate3d(var(--drift), 760px, 0) rotate(320deg); opacity: 0; }
+}
+@keyframes slow-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Respect reduced motion: jump every animation to its final state, hide ambient motion. */
+@media (prefers-reduced-motion: reduce) {
+  .landing *,
+  .landing *::before,
+  .landing *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.01ms !important;
+  }
+  .petals { display: none; }
+}
+
+/* ==========================================================================
+   Recipient page motion
+   ========================================================================== */
+.bouquet-sway {
+  transform-origin: 50% 85%;
+  animation: bouquet-sway 6.5s ease-in-out 2.6s infinite alternate both;
+}
+.gift-wiggle {
+  transform-origin: 50% 90%;
+  animation: gift-wiggle 3.4s ease-in-out 1.2s infinite;
+}
+.ambient-blob {
+  animation: ambient-drift 18s ease-in-out infinite alternate;
+}
+.ambient-blob--slow {
+  animation-duration: 24s;
+  animation-direction: alternate-reverse;
+}
+@keyframes bouquet-sway {
+  from { transform: rotate(-0.8deg); }
+  to { transform: rotate(0.8deg); }
+}
+@keyframes gift-wiggle {
+  0%, 70%, 100% { transform: rotate(0); }
+  74% { transform: rotate(-4deg); }
+  78% { transform: rotate(4deg); }
+  82% { transform: rotate(-3deg); }
+  86% { transform: rotate(2deg); }
+}
+@keyframes ambient-drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(40px, 30px, 0) scale(1.08); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bouquet-sway, .gift-wiggle, .ambient-blob { animation: none; }
+}

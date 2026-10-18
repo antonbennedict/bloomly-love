@@ -3,12 +3,12 @@ import Navbar from "@/components/Navbar";
 
 export const metadata = {
   title: "Design Your Bouquet — Bloomly",
-  description: "Drag flowers, wrapper wraps, fillers, and accents to build a customizable virtual flower arrangement. Add a card and share.",
+  description: "Arrange hand-drawn flowers, wraps and greenery into a bouquet, write a card, and share it with a link, email or QR code.",
 };
 
 export default function CreatePage() {
   return (
-    <div className="min-h-screen flex flex-col overflow-hidden bg-background">
+    <div className="h-dvh flex flex-col overflow-hidden bg-background">
       <Navbar />
       <Builder />
     </div>
